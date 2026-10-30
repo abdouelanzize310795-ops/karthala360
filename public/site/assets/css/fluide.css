@@ -1,0 +1,42 @@
+/* Fluidité de la navigation — n'altère pas le design du site.
+   Transition douce entre les pages (navigateurs récents ; les autres naviguent comme avant).
+   Désactivée pour les personnes qui demandent moins d'animations. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+  ::view-transition-old(root) { animation: k360-sortie .18s ease-in both; }
+  ::view-transition-new(root) { animation: k360-entree .28s ease-out both; }
+  /* L'en-tête reste en place pendant la transition : seule la page change */
+  .entete { view-transition-name: k360-entete; }
+  ::view-transition-group(k360-entete) { animation-duration: 0s; }
+}
+@keyframes k360-sortie { to { opacity: 0; } }
+@keyframes k360-entree { from { opacity: 0; transform: translateY(6px); } }
+
+/* Toucher plus net sur téléphone : pas de flash gris, réaction immédiate */
+a, button, [role="button"], label, summary { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+
+/* ---------- Avis de l'accueil : défilement continu ---------- */
+.avis-defile{position:relative;overflow:hidden;margin-inline:calc(-1 * var(--marge-defile,0px));padding-block:.4rem;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
+.avis-piste{display:flex;gap:1.2rem;width:max-content;will-change:transform;animation:avis-defile var(--duree,60s) linear infinite}
+.avis-piste > .avis{flex:none;width:min(23rem,78vw);transition:transform .3s ease,border-color .3s ease,box-shadow .3s ease}
+.avis-piste > .avis:hover{transform:translateY(-4px);border-color:rgba(103,220,139,.45);box-shadow:0 16px 40px rgba(0,0,0,.35)}
+/* Pause au survol, au doigt (classe posée par le script) et au clavier */
+.avis-defile:hover .avis-piste,.avis-defile:focus-within .avis-piste,.avis-defile.en-pause .avis-piste{animation-play-state:paused}
+@keyframes avis-defile{to{transform:translateX(calc(-50% - .6rem))}}
+/* Moins d'animations : une rangée qui se fait glisser au doigt ou à la souris */
+@media (prefers-reduced-motion: reduce){
+  .avis-defile{overflow-x:auto;scroll-snap-type:x mandatory;-webkit-mask-image:none;mask-image:none}
+  .avis-piste{animation:none}
+  .avis-piste > .avis{scroll-snap-align:start}
+  .avis-piste > .avis[aria-hidden="true"]{display:none}
+}
+
+/* ---------- Très petits téléphones (moins de 360 px) : rien ne dépasse de l'écran ---------- */
+@media (max-width:22.5rem){
+  .colonnes-2 > *, .est-grille > *, .est-liste li > *, .coches, .sombre { min-width:0; }
+  .est-carte, .coches, .sombre, .partenaire { overflow-wrap:anywhere; }
+  .logo-case.grand { width:100%; }
+}
+/* Garde-fou : jamais de défilement de côté (clip ne casse pas l'en-tête collant, contrairement à hidden) */
+html, body { overflow-x:clip; }

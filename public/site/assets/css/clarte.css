@@ -1,0 +1,80 @@
+/* Style « Clarté » — la lisibilité et la sobriété de la V75, avec les photos, le panier, la carte et les outils de notre site.
+   Tout est rangé sous html.clarte : sans cette classe, le site garde son design d'origine (réglage dans le back office). */
+
+/* ---------- Typographie très lisible (V75) ---------- */
+html.clarte{
+  --titre:"Archivo","Arial Narrow",Arial,sans-serif;
+  --texte:"Atkinson Hyperlegible",Verdana,Arial,sans-serif;
+  --r-petit:6px;
+  --r-moyen:12px;
+  --r-grand:16px;
+  --ombre:0 2px 12px rgba(27,31,28,.08);
+}
+html.clarte:not([data-theme="nuit"]){
+  --fond-page:#F2F3EF;
+  --cendre:#F2F3EF;
+  --texte-fort:#1B1F1C;
+  --texte-doux:#5B635C;
+  --trait:#D6DAD3;
+  --accent-texte:#1E6B3A;
+}
+.clarte body{font-size:1.0625rem;line-height:1.6}
+.clarte h1,.clarte h2,.clarte h3{font-stretch:82%;letter-spacing:-.005em;line-height:1.05}
+.clarte h1{font-weight:800}
+.clarte h2{font-weight:750}
+.clarte h3{font-stretch:90%}
+/* Mot mis en valeur : vert néon seulement sur fond sombre, vert forêt lisible ailleurs */
+.clarte:not([data-theme="nuit"]) .section:not(.fond-sombre):not(.fond-photo-sombre) :is(h1,h2) em{color:#1E6B3A}
+
+/* ---------- En-tête clair et calme (V75) ---------- */
+.clarte:not([data-theme="nuit"]) .entete{background:rgba(242,243,239,.96);border-bottom:1px solid #D6DAD3}
+.clarte:not([data-theme="nuit"]) .marque{color:#1B1F1C}
+.clarte .marque::before{background:#1E6B3A;color:#fff;box-shadow:none;border-radius:8px}
+.clarte:not([data-theme="nuit"]) .marque b span{color:#1E6B3A}
+.clarte:not([data-theme="nuit"]) .marque small{color:#5B635C}
+.clarte .marque b{font-stretch:78%;letter-spacing:.02em;font-size:1.2rem}
+.clarte:not([data-theme="nuit"]) .nav a{color:#1B1F1C;font-weight:600}
+.clarte .nav a:not(.bouton)::after{background:#1E6B3A}
+.clarte:not([data-theme="nuit"]) .nav a:hover,.clarte:not([data-theme="nuit"]) .nav a[aria-current="page"]{color:#1E6B3A}
+.clarte:not([data-theme="nuit"]) .nav a.nav-cle{border-color:#1E6B3A;color:#1E6B3A;border-radius:6px}
+.clarte:not([data-theme="nuit"]) .nav a.nav-cle:hover{background:rgba(30,107,58,.08);color:#154D2A}
+.clarte:not([data-theme="nuit"]) .nav a.nav-cle[aria-current="page"]{background:#1E6B3A;color:#fff}
+.clarte .nav .bouton{background:#1E6B3A;color:#fff;border-radius:6px}
+.clarte .nav .bouton:hover{background:#154D2A;color:#fff}
+.clarte:not([data-theme="nuit"]) .menu-bouton{background:#fff;border:1px solid #D6DAD3;color:#1B1F1C;border-radius:6px}
+.clarte:not([data-theme="nuit"]) .theme-bascule,.clarte:not([data-theme="nuit"]) .panier-bouton{border-color:#D6DAD3;background:#fff;color:#1B1F1C}
+.clarte .panier-nombre{background:#1E6B3A;color:#fff}
+@media (max-width:1180px){
+  .clarte:not([data-theme="nuit"]) .nav{background:#F2F3EF;border-bottom:1px solid #D6DAD3}
+  .clarte:not([data-theme="nuit"]) .nav a{border-bottom-color:#D6DAD3}
+  .clarte:not([data-theme="nuit"]) .nav a.nav-cle{border-bottom:1.5px solid #1E6B3A}
+}
+
+/* ---------- Boutons nets, sans effets (V75) ---------- */
+.clarte .bouton{border-radius:6px;background:#1E6B3A;color:#fff;box-shadow:none;font-weight:700;letter-spacing:0;border:2px solid #1E6B3A}
+.clarte .bouton:hover{background:#154D2A;border-color:#154D2A;transform:none;box-shadow:none;filter:none;color:#fff}
+.clarte .bouton.secondaire{background:transparent;color:var(--texte-fort);border:2px solid currentColor;box-shadow:none}
+.clarte .bouton.secondaire:hover{background:var(--texte-fort);color:var(--fond-page);border-color:var(--texte-fort)}
+.clarte :is(.fond-sombre,.heros,.bandeau-page) .bouton.secondaire{color:#fff;border-color:rgba(255,255,255,.75)}
+.clarte :is(.fond-sombre,.heros,.bandeau-page) .bouton.secondaire:hover{background:#fff;color:#1B1F1C}
+.clarte .bouton.whatsapp{background:#1E7B4A;border-color:#1E7B4A;color:#fff}
+
+/* ---------- Héros : photo lisible, texte bien contrasté (V75) ---------- */
+.clarte .heros::before{background:linear-gradient(180deg,rgba(20,24,21,.15) 0%,rgba(20,24,21,.35) 45%,rgba(20,24,21,.88) 100%)}
+
+/* ---------- Cartes et blocs : moins d'ombres et de lueurs, plus de clarté ---------- */
+.clarte .carte,.clarte .carte-qr{border-radius:12px}
+.clarte .carte:hover{box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.clarte [class*="badge"],.clarte .etiquette{border-radius:4px}
+.clarte .marque::before,.clarte .bouton,.clarte .panier-bouton,.clarte .theme-bascule{transition:background .15s,color .15s,border-color .15s}
+
+/* ---------- Formulaires : grands champs, faciles à toucher ---------- */
+.clarte input:not([type=checkbox]):not([type=radio]),.clarte select,.clarte textarea{border-radius:6px;font-size:1rem}
+.clarte .champ label{font-weight:700}
+
+/* ---------- Panier ---------- */
+.clarte .panier-tiroir{font-family:var(--texte)}
+.clarte .panier-pied .bouton{border-radius:6px}
+
+/* ---------- Mode nuit : on garde la lisibilité (polices, boutons), les couleurs sombres restent ---------- */
+[data-theme="nuit"].clarte .bouton.secondaire{color:#E6ECE7}

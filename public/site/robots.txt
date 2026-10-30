@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /enregistrement.html
+Disallow: /retour-experience.html
+Disallow: /confirmation.html
+Disallow: /qr-codes.html
+Disallow: /en/confirmation.html
+Disallow: /en/registration.html
+Disallow: /en/feedback.html
+
+Sitemap: https://karthala360.discovermores.com/sitemap.xml

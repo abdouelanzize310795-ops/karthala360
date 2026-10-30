@@ -1,0 +1,77 @@
+/* Panier de la boutique Karthala360 — reprend les couleurs et polices du site (variables de style.css) */
+.panier-bouton{position:relative;flex:none;display:grid;place-items:center;width:2.5rem;height:2.5rem;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.04);color:#DCE4DE;cursor:pointer;transition:border-color .15s,color .15s}
+.panier-bouton:hover{border-color:var(--neon);color:var(--neon)}
+.panier-bouton:focus-visible{outline:3px solid var(--neon);outline-offset:2px}
+.panier-bouton svg{width:1.2rem;height:1.2rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.panier-bouton[hidden]{display:none}
+.panier-nombre{position:absolute;top:-.3rem;right:-.3rem;min-width:1.25rem;height:1.25rem;padding:0 .3rem;border-radius:999px;background:var(--neon);color:#0D120E;font:800 .7rem/1.25rem var(--texte);text-align:center}
+.panier-nombre:empty{display:none}
+.panier-bouton.secousse{animation:panier-secousse .45s ease}
+@keyframes panier-secousse{30%{transform:scale(1.18)}60%{transform:scale(.94)}}
+
+/* Boutons des cartes produit */
+.carte-pied .panier-ajout{white-space:nowrap}
+.carte-pied .lien-wa{display:block;margin-top:.45rem;font-size:.8rem;font-weight:700;color:var(--accent-texte);text-decoration:underline;text-underline-offset:3px}
+.carte-pied.avec-panier{flex-wrap:wrap}
+
+/* Tiroir du panier */
+.panier-fond{position:fixed;inset:0;z-index:90;background:rgba(5,8,6,.55);opacity:0;transition:opacity .2s}
+.panier-fond.visible{opacity:1}
+.panier-tiroir{position:fixed;top:0;right:0;bottom:0;z-index:91;width:min(26rem,100%);display:flex;flex-direction:column;background:var(--surface,#fff);color:var(--texte-fort,#101510);box-shadow:-20px 0 60px rgba(0,0,0,.3);transform:translateX(100%);transition:transform .25s ease;font-family:var(--texte)}
+.panier-tiroir.visible{transform:none}
+.panier-tete{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1.1rem 1.3rem;border-bottom:1px solid var(--trait,#DCE5DE)}
+.panier-tete h2{margin:0;font:800 1.25rem var(--titre)}
+.panier-fermer{border:0;background:none;font-size:1.5rem;line-height:1;cursor:pointer;color:inherit;padding:.2rem .5rem;border-radius:8px}
+.panier-fermer:focus-visible{outline:3px solid var(--neon)}
+.panier-corps{flex:1;overflow:auto;padding:1rem 1.3rem;display:grid;gap:.9rem;align-content:start}
+.panier-vide{color:var(--texte-doux,#5E685F);text-align:center;padding:2rem 0}
+.panier-ligne{display:grid;grid-template-columns:3.6rem 1fr auto;gap:.8rem;align-items:center;padding-bottom:.9rem;border-bottom:1px solid var(--trait,#DCE5DE)}
+.panier-ligne img,.panier-ligne .sans-image{width:3.6rem;height:3.6rem;object-fit:cover;border-radius:10px;background:var(--fond-page,#F4F7F4)}
+.panier-ligne b{display:block;font-size:.95rem;line-height:1.25}
+.panier-ligne small{color:var(--texte-doux,#5E685F)}
+.panier-ligne .alerte{color:#C9362B;font-weight:700}
+.panier-qte{display:flex;align-items:center;gap:.3rem;margin-top:.35rem}
+.panier-qte button{width:1.9rem;height:1.9rem;border-radius:50%;border:1px solid var(--trait-champ,#CAD4CC);background:none;color:inherit;font-weight:800;cursor:pointer}
+.panier-qte span{min-width:1.6rem;text-align:center;font-weight:800}
+.panier-retirer{border:0;background:none;color:var(--texte-doux,#5E685F);font-size:.78rem;text-decoration:underline;cursor:pointer;margin-left:.4rem}
+.panier-prix{font-weight:800;white-space:nowrap}
+.panier-pied{padding:1rem 1.3rem 1.3rem;border-top:1px solid var(--trait,#DCE5DE);display:grid;gap:.7rem}
+.panier-total{display:flex;justify-content:space-between;font:800 1.1rem var(--titre)}
+.panier-note{margin:0;font-size:.8rem;color:var(--texte-doux,#5E685F)}
+.panier-pied .bouton{width:100%;justify-content:center;border:0;cursor:pointer}
+.panier-form{display:grid;gap:.7rem}
+.panier-form label{display:grid;gap:.25rem;font-size:.85rem;font-weight:700}
+.panier-form input,.panier-form select,.panier-form textarea{font:inherit;font-weight:400;padding:.65rem .75rem;border-radius:12px;border:1px solid var(--trait-champ,#CAD4CC);background:var(--fond-page,#F4F7F4);color:inherit}
+.panier-form .pot-de-miel{position:absolute;left:-9999px}
+.panier-erreur{color:#C9362B;font-weight:700;font-size:.88rem;margin:0}
+.panier-ok{display:grid;gap:.8rem;text-align:left}
+.panier-ok .ref{font:800 1.4rem var(--titre);color:var(--accent-texte,#1E7A3B)}
+.panier-toast{position:fixed;left:50%;bottom:6.5rem;transform:translate(-50%,1rem);z-index:95;background:#0D120E;color:#fff;padding:.7rem 1.1rem;border-radius:999px;font-weight:700;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.panier-toast.visible{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){.panier-tiroir,.panier-fond,.panier-toast{transition:none}.panier-bouton.secousse{animation:none}}
+/* Corrections d'affichage */
+.panier-qte{flex-wrap:wrap}
+.panier-retirer{margin-left:.7rem;padding:.2rem 0}
+.panier-pied .bouton:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.6)}
+
+/* « Retirer » : un lien discret, pas un bouton rond comme − et + */
+.panier-qte .panier-retirer{width:auto;height:auto;border:0;border-radius:6px;background:none;margin-left:auto;padding:.25rem .4rem;font-weight:700;font-size:.8rem;color:var(--texte-doux,#5E685F);text-decoration:underline;text-underline-offset:3px}
+.panier-qte .panier-retirer:hover{color:#C9362B}
+.panier-qte .panier-retirer:focus-visible{outline:3px solid var(--neon);outline-offset:2px}
+.panier-qte button:not(.panier-retirer){display:grid;place-items:center;padding:0;line-height:1;transition:border-color .15s,color .15s}
+.panier-qte button:not(.panier-retirer):hover{border-color:var(--neon,#67DC8B);color:var(--accent-texte,#1E7A3B)}
+.panier-ligne{align-items:start}
+.panier-prix{padding-top:.1rem}
+
+/* ---------- Activités dans le panier (réserver plusieurs sorties) ---------- */
+.panier-activite .activite-icone{display:grid;place-items:center;font-size:1.6rem;background:linear-gradient(135deg,rgba(30,122,59,.16),rgba(31,165,184,.16));color:var(--accent-texte,#1E7A3B)}
+.panier-activite small{display:block}
+.panier-cgv{display:flex !important;gap:.6rem;align-items:flex-start;font-weight:400 !important}
+.panier-cgv input{width:auto;margin-top:.2rem;accent-color:var(--accent-texte,#1E7A3B)}
+.panier-refs{margin:0;padding-left:1.1rem;display:grid;gap:.25rem;font-size:.9rem}
+.resa-panier{display:grid;gap:.5rem;margin-top:.8rem}
+.resa-panier .resa-ajout{justify-self:start}
+.resa-panier-aide{margin:0;font-size:.85rem;color:var(--texte-doux,#5E685F)}
+.resa-panier-rappel{margin:0;padding:.7rem .9rem;border-radius:12px;background:rgba(103,220,139,.12);border:1px solid rgba(103,220,139,.4);font-weight:700;font-size:.9rem}
+.resa-panier-rappel[hidden]{display:none}
+.lien-bouton{border:0;background:none;padding:0;font:inherit;font-weight:800;color:var(--accent-texte,#1E7A3B);text-decoration:underline;text-underline-offset:3px;cursor:pointer}

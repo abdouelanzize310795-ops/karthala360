@@ -1,0 +1,119 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Karthala360 Aperçu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Sora:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  /* Page volontairement sombre, comme le site : une seule ambiance, couleurs déclarées explicitement */
+  :root{
+    --nuit:#0D120E; --nuit-2:#161D18; --trait:rgba(255,255,255,.1);
+    --texte:#D5DCD7; --doux:#9BA59D; --blanc:#FFFFFF;
+    --neon:#67DC8B; --lagon:#1FA5B8; --degrade:linear-gradient(135deg,#1E7A3B,#1FA5B8);
+    --jaune:#FFF1B8;
+    color-scheme:dark;
+  }
+  body{margin:0;background:radial-gradient(circle at 85% 0%,rgba(103,220,139,.14),transparent 34rem),var(--nuit);color:var(--texte);
+    font:16px/1.6 "Manrope","Segoe UI",Arial,sans-serif;padding-inline:clamp(16px,4vw,48px);padding-block:clamp(28px,5vw,64px)}
+  main{max-width:68rem;margin:0 auto;display:grid;gap:clamp(2rem,4vw,3rem)}
+  h1,h2,h3{font-family:"Sora","Segoe UI",Arial,sans-serif;color:var(--blanc);letter-spacing:-.03em;line-height:1.1;margin:0;text-wrap:balance}
+  h1{font-size:clamp(2rem,5vw,3.4rem)}
+  h1 span{color:var(--neon)}
+  h2{font-size:1.35rem}
+  p{margin:0;max-width:62ch}
+  a{color:var(--neon)}
+  a:focus-visible{outline:3px solid var(--neon);outline-offset:3px;border-radius:6px}
+  .surtitre{font-size:.72rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--doux)}
+  .entete{display:grid;gap:1rem}
+  .actions{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:.5rem}
+  .bouton{display:inline-flex;align-items:center;gap:.6rem;min-height:3rem;padding:.75rem 1.4rem;border-radius:999px;font-weight:800;text-decoration:none;color:var(--blanc);background:var(--degrade)}
+  .bouton.contour{background:transparent;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.3)}
+  .bouton small{font-weight:700;font-size:.72rem;opacity:.8}
+  .grille{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr))}
+  .carte{background:rgba(255,255,255,.04);border:1px solid var(--trait);border-radius:18px;padding:1.2rem 1.3rem;display:grid;gap:.5rem;align-content:start}
+  .carte h3{font-size:1.05rem}
+  .carte p{font-size:.92rem;color:var(--doux)}
+  .liens{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.3rem}
+  .liens a{font-size:.82rem;font-weight:800;text-decoration:none;padding:.3rem .75rem;border-radius:999px;border:1px solid rgba(103,220,139,.45)}
+  .liens a.en{border-color:rgba(31,165,184,.55);color:#7FD3E0}
+  .fait{display:grid;gap:.5rem;padding:0;margin:0;list-style:none}
+  .fait li{display:grid;grid-template-columns:1.2rem 1fr;gap:.6rem;font-size:.95rem}
+  .fait li::before{content:"✓";color:var(--neon);font-weight:800}
+  .notes{background:var(--nuit-2);border:1px solid var(--trait);border-radius:18px;padding:1.2rem 1.4rem;display:grid;gap:.6rem}
+  .notes b{color:var(--blanc)}
+  mark{background:var(--jaune);color:#5A4300;padding:0 .3em;border-radius:4px}
+  footer{font-size:.82rem;color:var(--doux)}
+  @media (prefers-reduced-motion:no-preference){.bouton{transition:filter .2s,transform .2s}.bouton:hover{filter:brightness(1.08);transform:translateY(-1px)}}
+  .essais{display:grid;gap:.8rem;padding:0;margin:0;list-style:none;counter-reset:e}
+  .essais li{display:grid;grid-template-columns:2.2rem 1fr;gap:.8rem;align-items:start;counter-increment:e;background:rgba(255,255,255,.04);border:1px solid var(--trait);border-radius:16px;padding:1rem 1.1rem}
+  .essais li::before{content:counter(e);display:grid;place-items:center;width:2.2rem;height:2.2rem;border-radius:50%;background:var(--degrade);color:var(--blanc);font:800 .95rem "Sora",sans-serif}
+  .essais b{color:var(--blanc)}
+  .essais p{font-size:.93rem;color:var(--doux);margin-top:.2rem}
+  .essais a{font-weight:800}
+  .avis{background:linear-gradient(135deg,rgba(30,122,59,.22),rgba(31,165,184,.18));border:1px solid rgba(103,220,139,.35);border-radius:22px;padding:clamp(1.3rem,3vw,2rem);display:grid;gap:1rem}
+  .avis ol{margin:0;padding-left:1.3rem;display:grid;gap:.3rem}
+  .avis .bouton{background:#25D366;color:#07210F}
+  .numero{font:700 .95rem "Sora",sans-serif;color:var(--blanc);user-select:all}
+  .copier{min-height:2.6rem;padding:.5rem 1rem;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:none;color:var(--blanc);font:700 .85rem "Manrope",sans-serif;cursor:pointer}
+  .copier:focus-visible{outline:3px solid var(--neon);outline-offset:3px}
+</style>
+
+<main>
+  <header class="entete">
+    <p class="surtitre">En avant-première · 30 septembre 2026</p>
+    <h1>Karthala<span>360</span>, la future plateforme du volcan Karthala</h1>
+    <p>Discovermores, à Moroni, prépare le site de référence du Karthala : découvrir le volcan, choisir et réserver son ascension, poser ses questions à K269, notre guide randonneur virtuel. Le site n’est pas encore en ligne : vous le voyez avant tout le monde. <b>Parcourez-le comme un visiteur, de préférence sur votre téléphone, puis dites-nous ce que vous en pensez.</b></p>
+    <div class="actions">
+      <a class="bouton" href="site/index.html">Ouvrir le site <small>FR</small></a>
+      <a class="bouton contour" href="site/en/index.html">Open the website <small>EN</small></a>
+    </div>
+  </header>
+
+  <section aria-labelledby="t-essais" style="display:grid;gap:1rem">
+    <h2 id="t-essais">5 choses à essayer</h2>
+    <ol class="essais">
+      <li><div><b>L’accueil et les 4 formules</b><p>Comprenez-vous tout de suite ce qu’on propose, et à quel prix ? <a href="site/index.html">Accueil</a> · <a href="site/formules.html">Formules</a> · <a href="site/index.html#quad-buggy">Nouveau : quad et buggy</a></p></div></li>
+      <li><div><b>L’ascension sur la carte</b><p>Faites défiler la page : le point avance sur le vrai chemin, de 370 m à la caldeira. Passez le doigt ou la souris sur le profil d’altitude. <a href="site/ascension.html">L’ascension</a></p></div></li>
+      <li><div><b>Une question à K269</b><p>Touchez « Une question ? » en bas de l’écran et demandez par exemple « Peut-on monter avec des enfants ? ». <a href="site/question.html">Parler à K269</a></p></div></li>
+      <li><div><b>Le volcan, la nature, les légendes</b><p>Éruptions, oiseaux qu’on ne trouve que là, plantes médicinales, récits : est-ce que ça donne envie d’y aller ? <a href="site/decouvrir.html">Le volcan</a> · <a href="site/galerie.html">La galerie photos</a></p></div></li>
+      <li><div><b>Une réservation pour de faux</b><p>Remplissez le formulaire jusqu’au bout : rien n’est envoyé sans votre accord, le site propose simplement d’envoyer la demande par WhatsApp. <a href="site/reservation.html">Réserver</a></p></div></li>
+    </ol>
+  </section>
+
+  <section class="avis" aria-labelledby="t-avis">
+    <h2 id="t-avis">Votre avis compte</h2>
+    <p>Cinq questions suffisent. Le bouton ouvre WhatsApp avec les questions déjà écrites : complétez-les, puis envoyez.</p>
+    <ol><li>Ma première impression</li><li>Ce que j’ai compris en 10 secondes</li><li>Ce qui me donnerait envie de réserver</li><li>Ce qui est confus ou ne marche pas</li><li>J’ai regardé sur (téléphone ou ordinateur)</li></ol>
+    <div class="actions">
+      <a class="bouton" href="https://wa.me/2693565803?text=Bonjour%20Discovermores%2C%20voici%20mon%20avis%20sur%20Karthala%20360%20%3A%0A1.%20Ma%20premi%C3%A8re%20impression%20%3A%20%0A2.%20Ce%20que%20j%E2%80%99ai%20compris%20en%2010%20secondes%20%3A%20%0A3.%20Ce%20qui%20me%20donnerait%20envie%20de%20r%C3%A9server%20%3A%20%0A4.%20Ce%20qui%20est%20confus%20ou%20ne%20marche%20pas%20%3A%20%0A5.%20J%E2%80%99ai%20regard%C3%A9%20sur%20%28t%C3%A9l%C3%A9phone%20ou%20ordinateur%29%20%3A%20" target="_blank" rel="noopener">Donner mon avis sur WhatsApp</a>
+      <button type="button" class="copier" id="copier">Copier les questions</button>
+    </div>
+    <p style="font-size:.88rem;color:var(--doux)">Si WhatsApp ne s’ouvre pas, écrivez au <span class="numero">+269 356 58 03</span> (WhatsApp) ou à <span class="numero">contact@discovermores.com</span>.</p>
+    <textarea id="texte-questions" readonly hidden aria-hidden="true">Bonjour Discovermores, voici mon avis sur Karthala 360 :
+1. Ma première impression : 
+2. Ce que j’ai compris en 10 secondes : 
+3. Ce qui me donnerait envie de réserver : 
+4. Ce qui est confus ou ne marche pas : 
+5. J’ai regardé sur (téléphone ou ordinateur) : </textarea>
+  </section>
+
+  <section class="notes" aria-labelledby="t-notes">
+    <h2 id="t-notes">Ce qui n’est pas encore fini</h2>
+    <p><b>Les avis marqués « Exemple »</b> et l’événement marqué « Exemple » sont provisoires : ils seront remplacés par de vrais avis avant l’ouverture.</p>
+    <p><b>Les textes <mark>surlignés en jaune</mark></b> sont des informations à fournir (coordonnées de paiement, tarifs…).</p>
+    <p><b>K269</b> répond aujourd’hui avec les passages du site ; une fois son intelligence artificielle activée, il rédigera de vraies réponses, aussi sur les Comores en général.</p>
+    <p><b>Les formulaires</b> ne sont pas encore reliés : ils proposent l’envoi par WhatsApp, qui ne part jamais sans votre validation.</p>
+  </section>
+
+  <footer>Karthala 360 · Discovermores SARL, Moroni, Grande Comore. Merci de ne pas diffuser ce lien plus largement avant l’ouverture officielle.</footer>
+</main>
+<script>
+  // Copier les questions : presse-papiers si possible, sinon sélection du texte à copier soi-même
+  document.getElementById("copier").addEventListener("click", function () {
+    var zone = document.getElementById("texte-questions"), bouton = this;
+    var ok = function () { bouton.textContent = "Questions copiées"; };
+    var repli = function () { zone.hidden = false; zone.removeAttribute("aria-hidden"); zone.style.cssText = "width:100%;min-height:9rem;background:#161D18;color:#D5DCD7;border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:.8rem"; zone.focus(); zone.select(); bouton.textContent = "Sélectionnées : copiez-les"; };
+    try { navigator.clipboard.writeText(zone.value).then(ok, repli); } catch (e) { repli(); }
+  });
+</script>
+
+</body></html>

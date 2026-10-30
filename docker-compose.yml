@@ -1,0 +1,57 @@
+services:
+  karthala360:
+    build: .
+    image: karthala360:latest
+    container_name: karthala360
+    restart: unless-stopped
+    # Accessible seulement depuis cette machine : en ligne, on passe par Caddy (HTTPS)
+    ports:
+      - "127.0.0.1:${PORT:-3000}:3000"
+    env_file:
+      - .env
+    volumes:
+      - karthala360-data:/app/data   # base SQLite + photos envoyées
+
+  # Consultation de la base dans le navigateur (lecture seule, protégée par mot de passe).
+  # Accessible uniquement depuis cette machine : http://localhost:8080
+  base-de-donnees:
+    image: coleifer/sqlite-web@sha256:1e5b86237968ed747554f951c6df2fc2fe4bf4ef070b8ca23d553d7f6c6426f7  # version figée
+    container_name: karthala360-db
+    restart: unless-stopped
+    depends_on:
+      karthala360:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${DB_UI_PORT:-8080}:8080"
+    environment:
+      SQLITE_WEB_PASSWORD: ${DB_UI_PASSWORD:?Définissez DB_UI_PASSWORD dans .env}
+    # Attend que l'application ait créé la base avant de l'ouvrir en lecture seule
+    entrypoint: ["sh", "-c", "until [ -s /data/karthala360.db ]; do sleep 1; done; exec sqlite_web --host 0.0.0.0 --port 8080 --read-only --password /data/karthala360.db"]
+    volumes:
+      - karthala360-data:/data:ro
+
+  # HTTPS en production : docker compose --profile production up -d
+  # Prérequis : le domaine (DOMAINE dans .env) pointe vers ce serveur, ports 80 et 443 ouverts.
+  https:
+    image: caddy:2.8.4-alpine  # version figée
+    container_name: karthala360-https
+    restart: unless-stopped
+    profiles: ["production"]
+    depends_on:
+      - karthala360
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAINE: ${DOMAINE:?Définissez DOMAINE dans .env (ex. karthala360.discovermores.com)}
+    # HTTPS automatique : certificat Let's Encrypt obtenu et renouvelé par Caddy
+    command: ["caddy", "reverse-proxy", "--from", "${DOMAINE}", "--to", "karthala360:3000"]
+    volumes:
+      - caddy-data:/data       # certificats
+      - caddy-config:/config
+
+volumes:
+  karthala360-data:
+  caddy-data:
+  caddy-config:
