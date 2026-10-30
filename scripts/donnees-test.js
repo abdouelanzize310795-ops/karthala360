@@ -73,7 +73,7 @@ async function ajouter() {
     const adultes = 1 + (i % 4), enfants = i % 3 === 0 ? 1 : 0;
     const terminee = STATUTS[i] === 'terminée';
     const r = await formulaire({
-      formulaire: 'reservation', page: i % 4 === 3 ? '/site/en/book.html' : '/site/reservation.html',
+      formulaire: 'reservation', page: i % 4 === 3 ? '/en/book' : '/reservation',
       formule, nom: T + nom, telephone: tel, email, pays,
       date_souhaitee: jour(terminee ? -20 - i : 7 + i * 6), adultes, enfants,
       estimation: type === 'forfait' ? prix + 50 * Math.max(0, adultes + enfants - 2) : prix * (adultes + enfants),
@@ -98,7 +98,7 @@ async function ajouter() {
     for (let p = 0; p < 3 + s; p++) {
       const c = pick(CLIENTS, s * 3 + p);
       await formulaire({
-        formulaire: 'enregistrement', page: '/site/enregistrement.html', id_sortie: `TEST-S${s + 1}`, encadrement: 'Discovermores', formule: pick(FORMULES, s)[0],
+        formulaire: 'enregistrement', page: '/enregistrement', id_sortie: `TEST-S${s + 1}`, encadrement: 'Discovermores', formule: pick(FORMULES, s)[0],
         date_sortie: jour(-40 + s * 9), nom: T + c[0], sexe: p % 2 ? 'Femme' : 'Homme', tranche_age: pick(['18 à 35 ans', '36 à 55 ans', '12 à 17 ans'], p),
         nationalite: c[1], pays: c[1], ville: pick(['Moroni', 'Paris', 'Mitsamiouli', 'Londres'], p), telephone: c[2],
         urgence_nom: 'Contact test', urgence_tel: '+269 321 99 99', niveau: pick(['Débutant', 'Régulier', 'Sportif'], p),
@@ -124,7 +124,7 @@ async function ajouter() {
     ['Bivouac au volcan', 5, 'Repas excellents et tentes confortables.', 'Oui', 'Lena S.'],
   ];
   for (const [formule, note, commentaire, publication, signature] of RETOURS) {
-    await formulaire({ formulaire: 'retour', page: '/site/retour-experience.html', formule, note, commentaire: T + commentaire, publication, signature: signature && T + signature, difficulte: 'Adaptée', moment: 'Le lever de soleil' });
+    await formulaire({ formulaire: 'retour', page: '/retour-experience', formule, note, commentaire: T + commentaire, publication, signature: signature && T + signature, difficulte: 'Adaptée', moment: 'Le lever de soleil' });
   }
   console.log(`✓ ${RETOURS.length} retours d'expérience`);
 
@@ -135,7 +135,7 @@ async function ajouter() {
     ['Particulier', 'Question', 'Faut-il un certificat médical pour le Karthala Sportif ?'],
   ];
   for (const [organisation, sujet, message] of CONTACTS) {
-    await formulaire({ formulaire: 'contact', page: '/site/contact.html', nom: T + 'Contact ' + organisation, organisation, sujet, email: 'contact.test@example.com', telephone: '+269 321 00 50', message: T + message });
+    await formulaire({ formulaire: 'contact', page: '/contact', nom: T + 'Contact ' + organisation, organisation, sujet, email: 'contact.test@example.com', telephone: '+269 321 00 50', message: T + message });
   }
   console.log(`✓ ${CONTACTS.length} messages de contact`);
 
@@ -160,7 +160,7 @@ async function ajouter() {
   }
   await admin('POST', '/admin/partenaires', { nom: T + 'Partenaire exemple', niveau: 'confiance', description: 'Partenaire fictif de démonstration.', lien: 'https://example.org', ordre: 1, publie: 1 });
   console.log('✓ 3 commandes boutique, 1 partenaire');
-  console.log(`\nTerminé. Site : ${URL}/site/  ·  Back office : ${URL}/admin/`);
+  console.log(`\nTerminé. Site : ${URL}/  ·  Back office : ${URL}/admin/`);
 }
 
 async function vider() {

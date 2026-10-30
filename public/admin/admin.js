@@ -144,7 +144,7 @@
     $('#root').innerHTML = `<div class="layout"><aside id="side"><div class="poignee" id="poignee" title="Glisser pour élargir ou rétrécir le menu (double-clic : taille normale)"></div>
       <div class="menu-tete"><h1>KARTHALA<b>360</b></h1><button class="reduire" id="red" title="Réduire le menu" aria-label="Réduire le menu">«</button></div>
       ${NAV.filter(([k]) => (k !== 'users' && k !== 'journal') || me.role === 'admin').map(([k, l]) => k === '—' ? `<div class="nav-titre">${l}</div>` : `<a href="#${k}" class="${k === page ? 'on' : ''}">${l || CRUD[k].title}${badge[k] ? `<span class="pill">${badge[k]}</span>` : ''}</a>`).join('')}
-      <div class="who">${esc(me.name)} (${me.role})<br><a href="#" id="pw" style="padding:4px 0">Changer mot de passe</a><a href="#" id="lo" style="padding:4px 0">Déconnexion</a><a href="/site/" target="_blank" style="padding:4px 0">Voir le site ↗</a></div></aside>
+      <div class="who">${esc(me.name)} (${me.role})<br><a href="#" id="pw" style="padding:4px 0">Changer mot de passe</a><a href="#" id="lo" style="padding:4px 0">Déconnexion</a><a href="/" target="_blank" style="padding:4px 0">Voir le site ↗</a></div></aside>
       <main>${s.alerte && !['vert', ''].includes(s.alerte) ? `<div class="bandeau-alerte">⚠️ Alerte volcanique <b>${esc(s.alerte)}</b> affichée sur tout le site — <a href="#settings">modifier</a></div>` : ''}<button class="menu-btn" id="mb">☰ Menu</button><button class="rouvrir" id="rouv" title="Afficher le menu">☰ Menu</button><div id="view"></div></main></div>`;
     $('#mb').onclick = () => $('#side').classList.toggle('open');
     menuReglable();
@@ -500,7 +500,7 @@
     const titre = (c) => (c === 'created_at' ? 'Date' : c === 'confirmation_info' ? 'E-mail au client' : c === 'nom' && name === 'produits' ? 'Nom' : def.fields.find((f) => f[0] === c)?.[1] || c);
     v.innerHTML = `<h2>${def.title}</h2><div class="bar">${aide ? `<span class="mu">${aide}</span>` : ''}<span class="sp"></span><button class="b-p" id="add">+ Ajouter</button></div>
       <div class="panel"><table><tr>${def.cols.map((c) => `<th>${esc(titre(c))}</th>`).join('')}<th></th></tr>
-      ${rows.map((r) => `<tr>${def.cols.map((c) => `<td>${c === 'nom' && r.origine ? '★ ' : ''}${cell(r, c)}</td>`).join('')}<td style="white-space:nowrap">${name === 'sorties' ? `<a class="b b-sm" href="#sorties/${r.id}">Fiche & liste</a> <a class="b b-sm" href="/api/admin/pdf/sortie/${r.id}" target="_blank" rel="noopener">📄 PDF</a> ` : ''}${name === 'produits' && !r.origine ? `<a class="b b-sm" href="/site/boutique#${esc(r.code)}" target="_blank">Voir</a> ` : ''}<button class="b-sm" data-ed="${r.id}">Modifier</button>${r.origine ? '' : ` <button class="b-sm b-d" data-del="${r.id}">✕</button>`}</td></tr>`).join('') || `<tr><td colspan="9" class="mu">Rien pour l'instant</td></tr>`}</table></div>`;
+      ${rows.map((r) => `<tr>${def.cols.map((c) => `<td>${c === 'nom' && r.origine ? '★ ' : ''}${cell(r, c)}</td>`).join('')}<td style="white-space:nowrap">${name === 'sorties' ? `<a class="b b-sm" href="#sorties/${r.id}">Fiche & liste</a> <a class="b b-sm" href="/api/admin/pdf/sortie/${r.id}" target="_blank" rel="noopener">📄 PDF</a> ` : ''}${name === 'produits' && !r.origine ? `<a class="b b-sm" href="/boutique#${esc(r.code)}" target="_blank">Voir</a> ` : ''}<button class="b-sm" data-ed="${r.id}">Modifier</button>${r.origine ? '' : ` <button class="b-sm b-d" data-del="${r.id}">✕</button>`}</td></tr>`).join('') || `<tr><td colspan="9" class="mu">Rien pour l'instant</td></tr>`}</table></div>`;
     if ($('#add')) $('#add').onclick = () => editDialog(name, {});
     v.querySelectorAll('[data-ed]').forEach((b) => b.onclick = () => editDialog(name, rows.find((r) => r.id == b.dataset.ed)));
     v.querySelectorAll('[data-del]').forEach((b) => b.onclick = async () => { if (confirm('Supprimer ?')) { await api(`/admin/${name}/${b.dataset.del}`, { method: 'DELETE' }); shell(); } });
@@ -581,11 +581,11 @@
     const base = (s.site_url || location.origin).replace(/\/+$/, '');
     const ADRESSES = [
       ['Page d\'aperçu (accueil du lien)', '/', 'La première page : présentation, « Ouvrir le site », avis des testeurs.'],
-      ['Site en français', '/site/', ''], ['Site en anglais', '/site/en/', ''],
-      ['Réservation', '/site/reservation', 'À mettre dans vos messages et sur les réseaux.'],
-      ['Enregistrement des randonneurs (QR code)', '/site/enregistrement', 'Adresse contenue dans le QR code des sorties.'],
-      ['Retour d\'expérience', '/site/retour-experience', 'À envoyer par WhatsApp après chaque sortie.'],
-      ['QR code à imprimer', '/site/qr-codes', 'Page interne : à imprimer et plastifier.'],
+      ['Site en français', '/', ''], ['Site en anglais', '/en/', ''],
+      ['Réservation', '/reservation', 'À mettre dans vos messages et sur les réseaux.'],
+      ['Enregistrement des randonneurs (QR code)', '/enregistrement', 'Adresse contenue dans le QR code des sorties.'],
+      ['Retour d\'expérience', '/retour-experience', 'À envoyer par WhatsApp après chaque sortie.'],
+      ['QR code à imprimer', '/qr-codes', 'Page interne : à imprimer et plastifier.'],
       ['Plan du site (Google)', '/sitemap.xml', 'À déclarer dans Google Search Console.'],
       ['Back office', '/admin/', ''],
     ];
@@ -604,7 +604,7 @@
       <div class="panel" style="max-width:760px"><h3 style="margin-top:0">Adresses à partager</h3><table>
         ${ADRESSES.map(([nom, chemin, aide]) => `<tr><td><b>${nom}</b>${aide ? `<div class="mu">${aide}</div>` : ''}</td><td><a href="${esc(base + chemin)}" target="_blank" rel="noopener" style="word-break:break-all">${esc(base + chemin)}</a></td><td><button class="b-sm" data-copie="${esc(base + chemin)}">Copier</button></td></tr>`).join('')}
       </table></div>
-      <div class="panel" style="max-width:760px"><h3 style="margin-top:0">Anciennes adresses</h3><p class="mu" style="margin:0">Les liens de l'ancienne version (dossier WeTransfer, ex. <code>formules-ascension.html</code>), les adresses en <code>.html</code> et celles sans <code>/site/</code> mènent automatiquement à la bonne page : rien à faire.</p></div>`;
+      <div class="panel" style="max-width:760px"><h3 style="margin-top:0">Anciennes adresses</h3><p class="mu" style="margin:0">Les liens de l'ancienne version (dossier WeTransfer, ex. <code>formules-ascension.html</code>), les adresses en <code>.html</code> et les anciennes adresses en <code>/site/…</code> mènent automatiquement à la bonne page : rien à faire.</p></div>`;
     v.querySelectorAll('[data-copie]').forEach((b) => b.onclick = async () => {
       try { await navigator.clipboard.writeText(b.dataset.copie); toast('Adresse copiée'); } catch { prompt('Copiez l\'adresse :', b.dataset.copie); }
     });

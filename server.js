@@ -11,7 +11,7 @@ const pdf = require('./pdf');
 const PORT = process.env.PORT || 3000;
 const SESSION_DAYS = 7;
 const PUBLIC = path.join(__dirname, 'public');
-const SITE = path.join(PUBLIC, 'site'); // site Karthala360 ; la racine sert la page d'aperçu (index.html)
+const SITE = path.join(PUBLIC, 'site'); // site Karthala360, servi à la racine du domaine ; la page d'aperçu est sur /apercu
 const ENDPOINT = '/api/k360';
 
 // Colonnes modifiables par ressource du back office
@@ -583,7 +583,7 @@ ${contexte ? '\nPassages du site :\n' + contexte : ''}`;
 
   // config.js du site : endpoint, contacts, IA et tarifs viennent du serveur
   const configSource = fs.readFileSync(path.join(SITE, 'assets', 'js', 'config.js'), 'utf8');
-  app.get('/site/assets/js/config.js', (req, res) => {
+  app.get('/assets/js/config.js', (req, res) => {
     const s = settings();
     const liste = formules().filter((f) => f.actif).map((f) => ({ code: f.code, nom: f.nom, prix: f.prix, type: f.type, supp: f.supp, contrib: f.contrib, age_min: f.age_min, min_pers: f.min_pers }));
     const js = configSource
@@ -1028,14 +1028,14 @@ ${contexte ? '\nPassages du site :\n' + contexte : ''}`;
     'pourquoi-discovermores': '/',
   };
   // ---------- Adresses sans « .html » ----------
-  // /site/formules.html → /site/formules ; /site/index.html → /site/ ; la requête (?…) est conservée
+  // /formules.html → /formules ; /index.html → / ; la requête (?…) est conservée
   const propre = (chemin) => chemin.replace(/(^|\/)index\.html$/, '$1').replace(/\.html$/, '');
   const requete = (req) => { const q = req.originalUrl.indexOf('?'); return q >= 0 ? req.originalUrl.slice(q) : ''; };
 
   app.get(/^\/[a-z0-9-]+(\.html)?\/?$/i, (req, res, next) => {
     const nom = req.path.replace(/^\/|\/$/g, '').replace(/\.html$/i, '').toLowerCase();
     if (!ANCIENNES[nom] || fs.existsSync(path.join(PUBLIC, nom + '.html')) || fs.existsSync(path.join(SITE, nom + '.html')) || req.path.endsWith('/')) return next();
-    res.redirect(301, (ANCIENNES[nom].startsWith('/admin') ? '' : '/site') + propre(ANCIENNES[nom]) + requete(req));
+    res.redirect(301, propre(ANCIENNES[nom]) + requete(req));
   });
 
   // ---------- Adresse publique du site ----------
@@ -1050,22 +1050,25 @@ ${contexte ? '\nPassages du site :\n' + contexte : ''}`;
     res.send(html);
   }
 
-  app.get('/', (req, res) => envoyerPage(req, res, rendu.apercu(baseDe(req))));
+  // Page d'aperçu « en avant-première » (ancienne page d'accueil) : gardée sur /apercu
+  app.get('/apercu', (req, res) => envoyerPage(req, res, rendu.apercu(baseDe(req))));
 
   // Moteurs de recherche : robots.txt et plan du site à la racine
-  app.get(['/robots.txt', '/site/robots.txt'], (req, res) => res.type('text/plain').setHeader('Cache-Control', 'no-cache').send(rendu.robots(baseDe(req))));
-  app.get(['/sitemap.xml', '/site/sitemap.xml'], (req, res) => res.type('application/xml').setHeader('Cache-Control', 'no-cache').send(rendu.planDuSite(baseDe(req))));
+  app.get('/robots.txt', (req, res) => res.type('text/plain').setHeader('Cache-Control', 'no-cache').send(rendu.robots(baseDe(req))));
+  app.get('/sitemap.xml', (req, res) => res.type('application/xml').setHeader('Cache-Control', 'no-cache').send(rendu.planDuSite(baseDe(req))));
 
   // ---------- Pages du site : réglages du back office appliqués à l'envoi ----------
   // Script principal : son contenu ne dépend pas des réglages → gardé 1 h puis revalidé (ETag)
-  app.get('/site/assets/js/main.js', (req, res) => res.type('application/javascript').setHeader('Cache-Control', 'public, max-age=3600').send(rendu.script('assets/js/main.js')));
-  app.get(/^\/site\/(.*)$/, async (req, res, next) => {
+  // Anciennes adresses en /site/… (liens partagés, QR codes imprimés) → même page à la racine
+  app.get(/^\/site(\/.*)?$/, (req, res) => res.redirect(301, (req.params[0] || '/') + requete(req)));
+  app.get('/assets/js/main.js', (req, res) => res.type('application/javascript').setHeader('Cache-Control', 'public, max-age=3600').send(rendu.script('assets/js/main.js')));
+  app.get(/^\/(.*)$/, async (req, res, next) => {
     let rel = decodeURIComponent(req.params[0] || '');
     // Ancienne forme avec .html → adresse propre (liens partagés, favoris, moteurs de recherche)
-    if (/\.html$/i.test(rel) && fs.existsSync(path.join(SITE, rel))) return res.redirect(301, '/site/' + propre(rel) + requete(req));
-    // « /site/formules/ » → « /site/formules »
+    if (/\.html$/i.test(rel) && fs.existsSync(path.join(SITE, rel))) return res.redirect(301, '/' + propre(rel) + requete(req));
+    // « /formules/ » → « /formules »
     if (/[^/]\/$/.test(rel) && !fs.existsSync(path.join(SITE, rel)) && fs.existsSync(path.join(SITE, rel.slice(0, -1) + '.html'))) {
-      return res.redirect(301, '/site/' + rel.slice(0, -1) + requete(req));
+      return res.redirect(301, '/' + rel.slice(0, -1) + requete(req));
     }
     if (rel === '' || rel.endsWith('/')) rel += 'index.html';
     if (!/\.(html|json)$/.test(rel) && fs.existsSync(path.join(SITE, rel + '.html'))) rel += '.html';
@@ -1095,18 +1098,9 @@ ${contexte ? '\nPassages du site :\n' + contexte : ''}`;
       else res.setHeader('Cache-Control', 'public, max-age=3600');
     },
   };
-  app.use(express.static(PUBLIC, cacheStatique));
-  // Adresses du site sans /site/ (ex. /formules.html, /en/tours.html, liens canoniques) → /site/…
-  app.get(/.*/, (req, res, next) => {
-    const p = path.normalize(decodeURIComponent(req.path)).replace(/^([\\/])+/, '');
-    const cible = path.join(SITE, p);
-    if (!cible.startsWith(SITE) || !p) return next();
-    const ok = fs.existsSync(cible) || fs.existsSync(cible + '.html');
-    if (!ok) return next();
-    res.redirect(301, '/site' + propre(req.path) + requete(req)); // directement vers l'adresse propre
-  });
+  app.use(express.static(SITE, cacheStatique));
   // 404 : liens relatifs de la page rendus valides quel que soit le dossier demandé (ex. /en/xyz)
-  app.use((req, res) => envoyerPage(req, res, rendu.page('404.html', baseDe(req)).replace(/<head>/i, '<head><base href="/site/">'), 404));
+  app.use((req, res) => envoyerPage(req, res, rendu.page('404.html', baseDe(req)).replace(/<head>/i, '<head><base href="/">'), 404));
 
   // Sessions expirées : effacées au démarrage puis chaque heure
   const menageSessions = () => db.run('DELETE FROM sessions WHERE expires_at < ?', [Date.now()]);

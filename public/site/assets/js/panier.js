@@ -3,7 +3,7 @@
    Tous les textes sont insérés avec textContent (jamais de HTML venu de l'extérieur). */
 (function () {
   "use strict";
-  var EN = /\/site\/en\//.test(location.pathname);
+  var EN = /^\/en(\/|$)/.test(location.pathname);
   var T = function (fr, en) { return EN ? en : fr; };
   var CLE = "k360-panier";
   var ENDPOINT = (window.K360 && window.K360.endpoint) || "/api/k360";
@@ -191,7 +191,7 @@
     if (!panier.length) {
       corps.appendChild(el("p", { "class": "panier-vide" }, T("Votre panier est vide.", "Your cart is empty.")));
       if (!surBoutique) {
-        var lien = el("a", { "class": "bouton", href: EN ? "/site/en/shop" : "/site/boutique" }, T("Voir la boutique", "See the shop"));
+        var lien = el("a", { "class": "bouton", href: EN ? "/en/shop" : "/boutique" }, T("Voir la boutique", "See the shop"));
         pied.appendChild(lien);
       }
       return;
@@ -253,7 +253,7 @@
       autre.addEventListener("click", function () { fermerTiroir(); setTimeout(function () { formResa.elements.formule.focus(); }, 280); });
       secondaire = autre;
     } else if (activites().length) {
-      secondaire = el("a", { "class": "bouton secondaire", href: EN ? "/site/en/book" : "/site/reservation" }, T("+ Ajouter une activité", "+ Add an activity"));
+      secondaire = el("a", { "class": "bouton secondaire", href: EN ? "/en/book" : "/reservation" }, T("+ Ajouter une activité", "+ Add an activity"));
     }
     var suite = el("button", { type: "button", "class": "bouton" }, activites().length ? T("Valider le panier", "Check out") : T("Passer commande", "Checkout"));
     if (bloque) { suite.disabled = true; suite.title = T("Corrigez les articles signalés", "Fix the flagged items"); }
@@ -303,7 +303,7 @@
       labC.appendChild(cgv);
       var txt = el("span");
       txt.appendChild(document.createTextNode(T("J'ai lu les ", "I have read the ")));
-      txt.appendChild(el("a", { href: EN ? "/site/en/terms" : "/site/cgv", target: "_blank", rel: "noopener" }, T("conditions de vente", "terms of sale")));
+      txt.appendChild(el("a", { href: EN ? "/en/terms" : "/cgv", target: "_blank", rel: "noopener" }, T("conditions de vente", "terms of sale")));
       txt.appendChild(document.createTextNode(T(" (annulation, report météo).", " (cancellation, weather postponement).")));
       labC.appendChild(txt); form.appendChild(labC);
       var cgvResa = formResa && formResa.elements.accepte_cgv;
@@ -395,11 +395,11 @@
         "The Discovermores team will confirm availability and timing within 24 hours, then you pay for your order.")));
     corps.appendChild(ok);
     var wa = el("a", { "class": "bouton whatsapp", href: lienWhatsApp(form, lignes, rep.id), target: "_blank", rel: "noopener" }, T("Prévenir l'équipe sur WhatsApp", "Notify the team on WhatsApp"));
-    var payer = el("a", { "class": "bouton secondaire", href: EN ? "/site/en/payment" : "/site/paiement" }, T("Voir les moyens de paiement", "See payment methods"));
+    var payer = el("a", { "class": "bouton secondaire", href: EN ? "/en/payment" : "/paiement" }, T("Voir les moyens de paiement", "See payment methods"));
     pied.appendChild(wa); pied.appendChild(payer);
   }
 
-  // Panier ouvert depuis un lien (ex. /site/boutique#panier)
+  // Panier ouvert depuis un lien (ex. /boutique#panier)
   if (location.hash === "#panier") ouvrir();
   // Synchronisation entre onglets
   window.addEventListener("storage", function (e) { if (e.key === CLE) { panier = lire(); majBouton(); if (!tiroir.hidden) afficherPanier(); } });

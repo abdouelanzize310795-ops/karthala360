@@ -17,9 +17,9 @@ const VERSION = Date.now().toString(36);
 const STYLE_ESSAI = `(function(){try{var p=new URLSearchParams(location.search).get("style");if(p==="clarte"||p==="original")sessionStorage.setItem("k360-style",p);var s=sessionStorage.getItem("k360-style");var c=document.documentElement.classList;if(s==="clarte")c.add("clarte");else if(s==="original")c.remove("clarte");}catch(e){}})();`;
 // Navigation fluide : fondu entre les pages + préchargement des pages du site au survol (sans exécuter leur code).
 // Les adresses avec paramètres (?q=… de K269, ?formule=…) ne sont pas préchargées.
-const FLUIDE = `<link rel="stylesheet" href="/site/assets/css/fluide.css?v=${VERSION}">`;
+const FLUIDE = `<link rel="stylesheet" href="/assets/css/fluide.css?v=${VERSION}">`;
 const PRECHARGEMENT = '<script type="speculationrules">' + JSON.stringify({
-  prefetch: [{ where: { and: [{ href_matches: '/site/*' }, { not: { href_matches: '/site/*\\?*' } }, { not: { href_matches: '/site/*#*' } }] }, eagerness: 'moderate' }],
+  prefetch: [{ where: { and: [{ href_matches: '/*' }, { not: { href_matches: '/*\\?*' } }, { not: { href_matches: '/*#*' } }, { not: { href_matches: '/admin/*' } }, { not: { href_matches: '/api/*' } }] }, eagerness: 'moderate' }],
 }) + '</script>';
 
 // Champs « À COMPLÉTER » : [fichier, texte exact] → réglage
@@ -61,14 +61,14 @@ function creer(SITE, db) {
     return cache.get(rel);
   }
 
-  // Adresses complètes : le site est servi sous /site/ de l'adresse réglée (base = https://domaine)
+  // Adresses complètes : le site est servi à la racine de l'adresse réglée (base = https://domaine)
   // Une seule passe : l'adresse réglée peut contenir le domaine d'origine sans être remplacée deux fois
   const RE_DOMAINE = new RegExp(`(https://)?${DOMAINE_ORIGINE.replace(/\./g, '\\.')}(/)?`, 'g');
   function adresses(texte, base) {
     const hote = base.replace(/^https?:\/\//, '');
     return texte.replace(RE_DOMAINE, (m, https, barre) => {
-      if (https) return `${base}/site/`; // avec ou sans « / » final : la page d'accueil du site
-      return barre ? `${hote}/site/` : hote; // adresse affichée en texte (page QR code)
+      if (https) return `${base}/`; // avec ou sans « / » final : la page d'accueil du site
+      return barre ? `${hote}/` : hote; // adresse affichée en texte (page QR code)
     });
   }
 
@@ -80,11 +80,11 @@ function creer(SITE, db) {
     texte = texte.replace(RE_INTERNE, (m, q, chemin) => q + nettoie(chemin));
     if (base) {
       // Adresses complètes du site (liens Google, partage, plan du site, JSON-LD)
-      const re = new RegExp(base.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&') + '(/site/[^"\'<>\\s?#]*?)\\.html', 'g');
+      const re = new RegExp(base.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&') + '(/[^"\'<>\\s?#]*?)\\.html', 'g');
       texte = texte.replace(re, (m, chemin) => base + nettoie(chemin));
       // Même adresse écrite en texte, sans https:// (ex. page QR code)
       const hote = base.replace(/^https?:\/\//, '');
-      const reTexte = new RegExp('(^|[^/\\w.-])(' + hote.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&') + ')(/site/[^"\'<>\\s?#]*?)\\.html', 'g');
+      const reTexte = new RegExp('(^|[^/\\w.-])(' + hote.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&') + ')(/[^"\'<>\\s?#]*?)\\.html', 'g');
       texte = texte.replace(reTexte, (m, avant, h, chemin) => avant + h + nettoie(chemin));
     }
     return texte;
@@ -98,7 +98,7 @@ function creer(SITE, db) {
 
   // QR code d'enregistrement, généré pour l'adresse réglée (les QR imprimés suivent le domaine)
   const qrCache = new Map();
-  const lienEnregistrement = (base) => `${base}/site/enregistrement`;
+  const lienEnregistrement = (base) => `${base}/enregistrement`;
   async function preparerQR(base) {
     const url = lienEnregistrement(base);
     if (!qrCache.has(url)) {
@@ -247,7 +247,7 @@ function creer(SITE, db) {
     return html
       .replace(/(data-avis-zone="accueil" data-max=")\d+"/, '$112"')
       .replace(/(<div class="grille avis-grille" data-avis-liste>)[\s\S]*?(<\/div>\s*<div class="boutons">)/, `$1${cartes}$2`)
-      .replace(/<\/body>/i, `<script src="/site/assets/js/avis-defile.js?v=${VERSION}" defer></script>\n</body>`);
+      .replace(/<\/body>/i, `<script src="/assets/js/avis-defile.js?v=${VERSION}" defer></script>\n</body>`);
   }
 
   // Listes de formules des formulaires, à partir des tarifs du back office
@@ -369,11 +369,11 @@ function creer(SITE, db) {
     html = avisAccueil(html, en);
     html = soutiens(html, en);
     // Panier : sur toutes les pages (le bouton n'apparaît hors boutique que si le panier n'est pas vide)
-    html = html.replace(/<\/head>/i, `<link rel="stylesheet" href="/site/assets/css/panier.css?v=${VERSION}">\n${FLUIDE}\n</head>`)
-      .replace(/<\/body>/i, `<script src="/site/assets/js/panier.js?v=${VERSION}" defer></script>\n${PRECHARGEMENT}\n</body>`);
+    html = html.replace(/<\/head>/i, `<link rel="stylesheet" href="/assets/css/panier.css?v=${VERSION}">\n${FLUIDE}\n</head>`)
+      .replace(/<\/body>/i, `<script src="/assets/js/panier.js?v=${VERSION}" defer></script>\n${PRECHARGEMENT}\n</body>`);
     // Style « Clarté » (inspiré de la V75) : activé dans Paramètres, ou essayé avec ?style=clarte (?style=original pour revenir)
     const clarte = s.style_site !== 'original'; // Clarté par défaut
-    html = html.replace(/<\/head>/i, `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,600..800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">\n<link rel="stylesheet" href="/site/assets/css/clarte.css?v=${VERSION}">\n<script>${STYLE_ESSAI}</script>\n</head>`);
+    html = html.replace(/<\/head>/i, `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,600..800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">\n<link rel="stylesheet" href="/assets/css/clarte.css?v=${VERSION}">\n<script>${STYLE_ESSAI}</script>\n</head>`);
     if (clarte) html = html.replace(/<html([^>]*?)(\sclass="([^"]*)")?([^>]*)>/i, (m, a, c, cls, b) => `<html${a} class="${cls ? cls + ' ' : ''}clarte"${b}>`);
     // Chaque mise à jour du site force les navigateurs à recharger les styles et scripts (pas d'ancienne version en cache)
     html = html.replace(/(assets\/(?:css|js)\/[\w-]+\.(?:css|js))\?v=[\w]+/g, `$1?v=${VERSION}`);
@@ -388,21 +388,21 @@ function creer(SITE, db) {
     return sansHtml(coordonnees(reseaux(adresses(source(rel), base), s), s), base);
   }
 
-  // Plan du site pour les moteurs de recherche, adresses en /site/
+  // Plan du site pour les moteurs de recherche
   const planDuSite = (base) => sansHtml(adresses(source('sitemap.xml'), base), base);
 
-  // robots.txt servi à la racine : chemins du site préfixés par /site, back office et API exclus
+  // robots.txt : back office et API exclus
   function robots(base) {
     return adresses(source('robots.txt'), base)
-      .replace(/^(Disallow:\s*)\/(?!site\/)/gm, '$1/site/')
+      .replace(/^(Disallow:\s*\S*?)(?:index)?\.html\s*$/gm, '$1') // pages servies sans .html
       .replace(/^(Sitemap:.*)$/m, 'Disallow: /admin/\nDisallow: /api/\n\n$1')
       .replace(/^Sitemap:.*$/m, `Sitemap: ${base}/sitemap.xml`);
   }
 
-  // Page d'aperçu (racine) : mêmes coordonnées et réseaux que le site
+  // Page d'aperçu (/apercu) : mêmes coordonnées et réseaux que le site ; ses liens « site/… » mènent à la racine
   function apercu(base) {
     const s = Object.fromEntries(db.all('SELECT key,value FROM settings').map((r) => [r.key, r.value]));
-    const html = sansHtml(coordonnees(reseaux(adresses(source('../index.html'), base), s), s), base);
+    const html = sansHtml(coordonnees(reseaux(adresses(source('../index.html').replace(/(href=")site\//g, '$1/'), base), s), s), base);
     return html.replace(/<\/head>/i, `${FLUIDE}\n</head>`).replace(/<\/body>/i, `${PRECHARGEMENT}\n</body>`);
   }
 

@@ -7,7 +7,7 @@ Site public Karthala360 (FR/EN, design de l'aperçu Discovermores) + backend + b
 cp .env.example .env      # puis changer ADMIN_PASSWORD
 docker compose up -d --build
 ```
-- Page d'aperçu (accueil) : http://localhost:3000 — site : http://localhost:3000/site/ (anglais : /site/en/)
+- Site : http://localhost:3000/ (anglais : /en/) — page d'aperçu « avant-première » : /apercu
 - Back office : http://localhost:3000/admin (identifiants de `.env`, utilisés au premier démarrage seulement)
 - Données : volume Docker `karthala360-data` (fichier SQLite). Sauvegarde :
   `docker compose cp karthala360:/app/data/karthala360.db ./sauvegarde.db`
@@ -72,8 +72,8 @@ Back office → **Liens du site** :
 - **Instagram / Facebook** : remplacent les liens des réseaux sur toutes les pages.
 - **Adresses à partager** : aperçu, site FR/EN, réservation, enregistrement (QR), retour d'expérience, plan du site, back office.
 
-Structure : `/` page d'aperçu · `/site/` site français (pages sans .html : `/site/formules`) · `/site/en/` site anglais · `/admin/` back office.
-Les adresses en `.html`, celles sans `/site/` et celles de l'ancienne version mènent automatiquement à la bonne page.
+Structure : `/` site français (pages sans .html : `/formules`) · `/en/` site anglais · `/apercu` page d'aperçu · `/admin/` back office.
+Les adresses en `.html`, les anciennes adresses en `/site/…` et celles de l'ancienne version mènent automatiquement à la bonne page.
 
 ## Sécurité
 | Protection | Détail |
