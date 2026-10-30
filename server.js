@@ -1009,7 +1009,7 @@ ${contexte ? '\nPassages du site :\n' + contexte : ''}`;
   // ---------- Anciennes adresses (version WeTransfer, app React) → pages actuelles (301) ----------
   // Les liens partagés et QR codes imprimés de l'ancienne version restent valides.
   const ANCIENNES = {
-    'admin': '/admin/', 'stats': '/observatoire.html', 'checklist-mise-en-ligne': '/',
+    'stats': '/observatoire.html', 'checklist-mise-en-ligne': '/',
     'avant-pendant-apres': '/preparer.html', 'preparer-ascension-karthala': '/preparer.html', 'preparer-son-ascension': '/preparer.html',
     'sante-condition-physique': '/preparer.html', 'securite-meteo-go-no-go': '/preparer.html', 'meteo-conditions-terrain': '/preparer.html', 'guides-metiers-karthala': '/preparer.html',
     'bilan-karthala-zero-dechets': '/impact.html', 'impact-engagement-karthala': '/impact.html', 'charte-visiteur-responsable': '/impact.html',
@@ -1085,7 +1085,16 @@ ${contexte ? '\nPassages du site :\n' + contexte : ''}`;
   // ---------- Fichiers statiques ----------
   // Fichiers envoyés : affichables comme images, jamais exécutables (un SVG ouvert seul reste inerte)
   app.use('/uploads', express.static(UPLOADS, { maxAge: '7d', setHeaders: (res) => securite.enTetesFichierEnvoye(res) }));
-  app.use('/admin', (req, res, next) => { res.setHeader('X-Robots-Tag', 'noindex'); next(); }, express.static(path.join(PUBLIC, 'admin')));
+  // Back office sur une adresse secrète (ADMIN_CHEMIN dans .env) : /admin n'existe pas, il répond « page introuvable ».
+  // Sans réglage, une adresse aléatoire est créée une fois, gardée dans la base et affichée dans le journal du serveur.
+  let cheminAdmin = String(process.env.ADMIN_CHEMIN || settings().admin_chemin || '').trim().replace(/^\/+|\/+$/g, '');
+  if (!/^[a-z0-9-]{16,}$/i.test(cheminAdmin)) {
+    cheminAdmin = 'gestion-' + crypto.randomBytes(12).toString('hex');
+    db.run('INSERT OR REPLACE INTO settings (key,value) VALUES (?,?)', ['admin_chemin', cheminAdmin]);
+  }
+  const ADMIN = '/' + cheminAdmin;
+  app.get(ADMIN, (req, res, next) => (req.path.endsWith('/') ? next() : res.redirect(301, ADMIN + '/')));
+  app.use(ADMIN, (req, res, next) => { res.setHeader('X-Robots-Tag', 'noindex, nofollow'); res.setHeader('Referrer-Policy', 'no-referrer'); next(); }, express.static(path.join(PUBLIC, 'admin')));
   // Mise en cache : pages toujours à jour ; styles/scripts versionnés (?v=…) gardés 1 an (l'adresse change à chaque mise à jour) ;
   // images et polices 30 jours ; le reste 1 heure. Les navigateurs revalident ensuite à moindre coût (ETag → 304).
   app.use((req, res, next) => { if (/[?&]v=/.test(req.originalUrl)) res.locals.versionne = true; next(); });
@@ -1121,5 +1130,5 @@ ${contexte ? '\nPassages du site :\n' + contexte : ''}`;
   setTimeout(sauvegarder, 60e3).unref();
   setInterval(sauvegarder, 24 * 3600e3).unref();
 
-  app.listen(PORT, () => console.log(`Karthala360 sur http://localhost:${PORT}  (back office : /admin)`));
+  app.listen(PORT, () => console.log(`Karthala360 sur http://localhost:${PORT}  (back office : http://localhost:${PORT}${ADMIN}/)`));
 });

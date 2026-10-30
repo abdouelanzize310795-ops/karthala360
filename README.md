@@ -8,7 +8,7 @@ cp .env.example .env      # puis changer ADMIN_PASSWORD
 docker compose up -d --build
 ```
 - Site : http://localhost:3000/ (anglais : /en/) — page d'aperçu « avant-première » : /apercu
-- Back office : http://localhost:3000/admin (identifiants de `.env`, utilisés au premier démarrage seulement)
+- Back office : http://localhost:3000/ADMIN_CHEMIN/ — adresse secrète réglée dans `.env` (ligne `ADMIN_CHEMIN`) ; `/admin` n'existe pas. Identifiants de `.env`, utilisés au premier démarrage seulement
 - Données : volume Docker `karthala360-data` (fichier SQLite). Sauvegarde :
   `docker compose cp karthala360:/app/data/karthala360.db ./sauvegarde.db`
 
@@ -29,7 +29,7 @@ La base est un fichier SQLite (`/app/data/karthala360.db`, dans le volume `karth
 
 **1. Dans le navigateur (recommandé)** : http://localhost:8080, mot de passe `DB_UI_PASSWORD` du fichier `.env`.
 Tables, recherche, filtres, requêtes SQL (onglet *Query*) et export CSV/JSON. **Lecture seule** : l'application garde
-la base en mémoire et réécrit le fichier à chaque changement ; toute modification se fait par le back office (`/admin`).
+la base en mémoire et réécrit le fichier à chaque changement ; toute modification se fait par le back office.
 Cet accès n'est ouvert que sur la machine du serveur (127.0.0.1). Sur un serveur distant, passez par un tunnel SSH :
 `ssh -L 8080:localhost:8080 utilisateur@serveur`.
 
@@ -72,7 +72,7 @@ Back office → **Liens du site** :
 - **Instagram / Facebook** : remplacent les liens des réseaux sur toutes les pages.
 - **Adresses à partager** : aperçu, site FR/EN, réservation, enregistrement (QR), retour d'expérience, plan du site, back office.
 
-Structure : `/` site français (pages sans .html : `/formules`) · `/en/` site anglais · `/apercu` page d'aperçu · `/admin/` back office.
+Structure : `/` site français (pages sans .html : `/formules`) · `/en/` site anglais · `/apercu` page d'aperçu · back office sur l'adresse secrète `ADMIN_CHEMIN`.
 Les adresses en `.html`, les anciennes adresses en `/site/…` et celles de l'ancienne version mènent automatiquement à la bonne page.
 
 ## Sécurité

@@ -19,7 +19,7 @@ const STYLE_ESSAI = `(function(){try{var p=new URLSearchParams(location.search).
 // Les adresses avec paramètres (?q=… de K269, ?formule=…) ne sont pas préchargées.
 const FLUIDE = `<link rel="stylesheet" href="/assets/css/fluide.css?v=${VERSION}">`;
 const PRECHARGEMENT = '<script type="speculationrules">' + JSON.stringify({
-  prefetch: [{ where: { and: [{ href_matches: '/*' }, { not: { href_matches: '/*\\?*' } }, { not: { href_matches: '/*#*' } }, { not: { href_matches: '/admin/*' } }, { not: { href_matches: '/api/*' } }] }, eagerness: 'moderate' }],
+  prefetch: [{ where: { and: [{ href_matches: '/*' }, { not: { href_matches: '/*\\?*' } }, { not: { href_matches: '/*#*' } }, { not: { href_matches: '/api/*' } }] }, eagerness: 'moderate' }],
 }) + '</script>';
 
 // Champs « À COMPLÉTER » : [fichier, texte exact] → réglage
@@ -395,7 +395,7 @@ function creer(SITE, db) {
   function robots(base) {
     return adresses(source('robots.txt'), base)
       .replace(/^(Disallow:\s*\S*?)(?:index)?\.html\s*$/gm, '$1') // pages servies sans .html
-      .replace(/^(Sitemap:.*)$/m, 'Disallow: /admin/\nDisallow: /api/\n\n$1')
+      .replace(/^(Sitemap:.*)$/m, 'Disallow: /api/\n\n$1') // l'adresse secrète du back office n'est jamais écrite ici
       .replace(/^Sitemap:.*$/m, `Sitemap: ${base}/sitemap.xml`);
   }
 
