@@ -56,7 +56,18 @@ init().then((db) => {
   let ipsProxy = new Set();
   const majProxy = () => require('dns').lookup(PROXY_HOTE, { all: true }, (err, l) => { ipsProxy = new Set(err ? [] : l.map((x) => x.address)); });
   majProxy(); setInterval(majProxy, 60e3).unref();
-  app.set('trust proxy', (adresse) => ipsProxy.has(String(adresse).replace(/^::ffff:/, '')));
+  // Autre proxy (ex. nginx installé sur le serveur) : PROXY_IPS=passerelle (la machine hôte, vue depuis Docker)
+  // ou une liste d'adresses séparées par des virgules
+  const ipsFixes = new Set();
+  for (const v of String(process.env.PROXY_IPS || '').split(',').map((x) => x.trim()).filter(Boolean)) {
+    if (v !== 'passerelle') { ipsFixes.add(v); continue; }
+    try {
+      const ligne = fs.readFileSync('/proc/net/route', 'utf8').split('\n').find((l) => l.split('\t')[1] === '00000000');
+      const hex = ligne && ligne.split('\t')[2];
+      if (hex) ipsFixes.add(hex.match(/../g).reverse().map((h) => parseInt(h, 16)).join('.'));
+    } catch {}
+  }
+  app.set('trust proxy', (adresse) => { const a = String(adresse).replace(/^::ffff:/, ''); return ipsProxy.has(a) || ipsFixes.has(a); });
   app.use(securite.enTetes);
   // Compression gzip des pages, styles, scripts et données (4 à 5 fois plus légers) ; les images WebP/JPEG sont déjà compressées
   app.use(require('compression')({ threshold: 1024 }));
