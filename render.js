@@ -323,6 +323,22 @@ function creer(SITE, db) {
     return html.replace(/(<div class="pied-soutien-logos">)[\s\S]*?(<\/div><\/div>)/, `$1${logos}$2`);
   }
 
+  // Accueil, « Ils nous font confiance » : logos des rubriques « confiance » puis « financeur ».
+  // Dès qu'un logo existe, les emplacements « Logo à venir » disparaissent.
+  function logosAccueil(html, en) {
+    const liste = db.all("SELECT * FROM partenaires WHERE publie=1 AND niveau IN ('confiance','financeur') ORDER BY niveau='financeur', ordre, id");
+    if (!liste.length) return html;
+    const logos = liste.map((p) => {
+      const desc = (en && p.description_en) || p.description || '';
+      const titre = esc(desc ? `${p.nom} — ${desc}` : p.nom);
+      const contenu = p.logo ? `<img src="${esc(p.logo)}" alt="${esc(p.nom)}" loading="lazy" decoding="async">` : `<span>${esc(p.nom)}</span>`;
+      return p.lien
+        ? `<a class="logo-case" href="${esc(p.lien)}" rel="noopener" target="_blank" title="${titre}">${contenu}</a>`
+        : `<span class="logo-case" title="${titre}">${contenu}</span>`;
+    }).join('');
+    return html.replace(/(<div class="grille-logos">)[\s\S]*?<\/div>/, `$1${logos}</div>`);
+  }
+
   function galerie(html, en) {
     const photos = db.all('SELECT * FROM photos WHERE publie=1 ORDER BY ordre, id');
     if (!photos.length) return html;
@@ -371,6 +387,7 @@ function creer(SITE, db) {
     html = tableauPrix(html, rel, en);
     html = avisAccueil(html, en);
     html = soutiens(html, en);
+    if (rel === 'index.html' || rel === 'en/index.html') html = logosAccueil(html, en);
     // Panier : sur toutes les pages (le bouton n'apparaît hors boutique que si le panier n'est pas vide)
     html = html.replace(/<\/head>/i, `<link rel="stylesheet" href="/assets/css/panier.css?v=${VERSION}">\n${FLUIDE}\n</head>`)
       .replace(/<\/body>/i, `<script src="/assets/js/panier.js?v=${VERSION}" defer></script>\n${PRECHARGEMENT}\n</body>`);

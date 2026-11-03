@@ -494,7 +494,7 @@
       avis: 'Les retours d\'expérience avec accord de publication arrivent ici, non publiés : relisez puis cochez « Publié ».',
       produits: 'Les produits ajoutés apparaissent sur la page Boutique (français et anglais) avec photo, tailles et bouton de commande WhatsApp. Pour les 7 produits d\'origine (★), seuls le prix, le stock et la disponibilité se modifient.',
       commandes: 'Les commandes passées avec le panier du site arrivent ici avec leur référence (B…). Celles reçues sur WhatsApp peuvent être ajoutées à la main. Une commande annulée remet ses articles en stock.',
-      partenaires: 'Rubrique « Avec le soutien de » : logos du pied de page, sur toutes les pages. Les deux autres rubriques remplacent les emplacements vides de la page Partenaires. Logo conseillé : PNG ou SVG sur fond transparent ou blanc.',
+      partenaires: 'Rubrique « Avec le soutien de » : logos du pied de page, sur toutes les pages. Les deux autres rubriques remplacent les emplacements vides de la page Partenaires et de la section « Ils nous font confiance » de l'accueil. Logo conseillé : PNG ou SVG sur fond transparent ou blanc.',
       photos: 'Les photos publiées apparaissent en tête de la galerie, dans une rubrique « Dernières photos ».',
     }[name];
     const titre = (c) => (c === 'created_at' ? 'Date' : c === 'confirmation_info' ? 'E-mail au client' : c === 'nom' && name === 'produits' ? 'Nom' : def.fields.find((f) => f[0] === c)?.[1] || c);

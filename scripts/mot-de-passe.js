@@ -1,4 +1,5 @@
-// Nouveau mot de passe pour un compte du back office (mot de passe oublié).
+// Nouveau mot de passe pour un compte du back office (mot de passe oublié),
+// ou création d'un compte administrateur si l'e-mail tapé n'existe pas encore.
 // À lancer application arrêtée, sinon elle réécrirait la base avec l'ancien mot de passe :
 //   docker compose stop karthala360
 //   docker compose run --rm -it karthala360 node scripts/mot-de-passe.js
@@ -27,12 +28,25 @@ function demander(question, masque) {
   console.log('Comptes du back office :');
   for (const c of comptes) console.log(`  - ${c.email} (${c.role})`);
   const email = (await demander(`E-mail du compte [${comptes[0].email}] : `)) || comptes[0].email;
-  const u = db.get('SELECT id, email FROM users WHERE email=?', [email.toLowerCase()]);
-  if (!u) { console.log('Aucun compte avec cet e-mail.'); process.exit(1); }
+  let u = db.get('SELECT id, email FROM users WHERE email=?', [email.toLowerCase()]);
+  if (!u) {
+    // E-mail inconnu : on propose de créer un nouveau compte administrateur
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { console.log('E-mail invalide.'); process.exit(1); }
+    const oui = await demander(`Aucun compte avec cet e-mail. Créer un compte administrateur ${email.toLowerCase()} ? (o/n) : `);
+    if (!/^o/i.test(oui)) process.exit(1);
+    const nom = (await demander('Nom affiché [Administrateur] : ')) || 'Administrateur';
+    u = { id: null, email: email.toLowerCase(), nom };
+  }
   const mdp = await demander('Nouveau mot de passe (rien ne s\'affiche, c\'est normal) : ', true);
   const erreur = securite.erreurMotDePasse(mdp, db.MDP_PAR_DEFAUT, u.email);
   if (erreur) { console.log(erreur); process.exit(1); }
   if (mdp !== await demander('Retapez-le : ', true)) { console.log('Les deux mots de passe sont différents.'); process.exit(1); }
+  if (!u.id) {
+    db.run('INSERT INTO users (email,name,password_hash,role) VALUES (?,?,?,?)', [u.email, u.nom, db.hashPassword(mdp), 'admin']);
+    db.run('INSERT INTO journal (utilisateur,action,cible) VALUES (?,?,?)', [u.email, 'compte administrateur créé (console du serveur)', '']);
+    console.log(`Compte administrateur créé : ${u.email}. Relancez l'application : docker compose start karthala360`);
+    process.exit(0);
+  }
   db.run('UPDATE users SET password_hash=?, doit_changer=0 WHERE id=?', [db.hashPassword(mdp), u.id]);
   db.run('DELETE FROM sessions WHERE user_id=?', [u.id]);
   db.run('INSERT INTO journal (utilisateur,action,cible) VALUES (?,?,?)', [u.email, 'mot de passe réinitialisé (console du serveur)', '']);
