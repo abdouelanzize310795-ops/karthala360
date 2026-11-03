@@ -8,12 +8,17 @@ const { init } = require('../db');
 const securite = require('../securite');
 
 // Saisie masquée : rien ne s'affiche à l'écran pendant la frappe
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: !!process.stdin.isTTY });
+let masquer = false;
+const ecrire = rl._writeToOutput.bind(rl);
+rl._writeToOutput = (t) => { if (!masquer || /\n/.test(t)) ecrire(masquer ? '\n' : t); };
+// Lignes tapées gardées en file d'attente (rien n'est perdu si on tape avant la question)
+const lignes = [], attentes = [];
+rl.on('line', (l) => { masquer = false; (attentes.length ? attentes.shift() : (x) => lignes.push(x))(l.trim()); });
 function demander(question, masque) {
-  return new Promise((ok) => {
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: true });
-    if (masque) rl._writeToOutput = (t) => { if (t.includes(question)) process.stdout.write(t); };
-    rl.question(question, (r) => { rl.close(); if (masque) process.stdout.write('\n'); ok(r.trim()); });
-  });
+  process.stdout.write(question);
+  masquer = !!masque; // la question est affichée, la frappe ne l'est pas
+  return new Promise((ok) => (lignes.length ? (masquer = false, ok(lignes.shift())) : attentes.push(ok)));
 }
 
 (async () => {
