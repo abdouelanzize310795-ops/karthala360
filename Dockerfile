@@ -6,6 +6,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 COPY server.js db.js render.js securite.js pdf.js ./
 COPY public ./public
+COPY scripts ./scripts
 RUN mkdir -p /app/data && chown -R node:node /app/data
 ENV PORT=3000 DB_FILE=/app/data/karthala360.db
 EXPOSE 3000
