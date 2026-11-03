@@ -218,11 +218,14 @@ function creer(SITE, db) {
       const du = liste.filter((p) => p.niveau === niveau);
       if (!du.length) continue;
       const debut = g.index + g[0].length;
-      let reste = html.slice(debut);
+      // Seulement les emplacements de CETTE grille (jusqu'à la fin de sa section)
+      const finSection = html.indexOf('</section>', debut);
+      const fin = finSection < 0 ? html.length : finSection;
+      let zone = html.slice(debut, fin);
       let i = 0;
-      reste = reste.replace(/<article class="partenaire vide">[\s\S]*?<\/article>/g, (m) => (i < du.length ? carte(du[i++]) : m));
+      zone = zone.replace(/<article class="partenaire vide">[\s\S]*?<\/article>/g, (m) => (i < du.length ? carte(du[i++]) : m));
       const extra = du.slice(i).map(carte).join('');
-      html = html.slice(0, debut) + extra + reste;
+      html = html.slice(0, debut) + extra + zone + html.slice(fin);
     }
     return html;
   }
