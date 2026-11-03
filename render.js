@@ -206,7 +206,7 @@ function creer(SITE, db) {
     const liste = db.all("SELECT * FROM partenaires WHERE publie=1 ORDER BY ordre, id");
     if (!liste.length) return html;
     const carte = (p) => {
-      const logo = p.logo ? `<img src="${esc(p.logo)}" alt="${esc(p.nom)}" loading="lazy" style="max-width:100%;max-height:100%;object-fit:contain">` : `<span>${esc(p.nom)}</span>`;
+      const logo = p.logo ? `<img src="${esc(p.logo)}" alt="${esc(p.nom)}" loading="lazy" decoding="async">` : `<span>${esc(p.nom)}</span>`;
       const boite = p.lien ? `<a class="logo-case grand" href="${esc(p.lien)}" rel="noopener" target="_blank">${logo}</a>` : `<span class="logo-case grand">${logo}</span>`;
       const desc = (en && p.description_en) || p.description || '';
       return `<article class="partenaire">${boite}<div><h3>${esc(p.nom)}</h3>${desc ? `<p class="petit">${esc(desc)}</p>` : ''}</div></article>`;
