@@ -1123,11 +1123,23 @@
     var flottante = document.querySelector("[data-une-flottante]");
     var CLE_UNE = "k360-une-fermee";
     var dejaFermee = function (id) { try { return localStorage.getItem(CLE_UNE) === id; } catch (e) { return false; } };
+    // La colonne prend la largeur qui permet à la photo entière d’occuper toute la hauteur de la carte
+    var ajusterImageUne = function () {
+      var img = flottante && flottante.querySelector(".une-image");
+      if (!img || !img.naturalWidth || flottante.hidden) return;
+      if (window.innerWidth <= 700) { flottante.style.removeProperty("--une-col"); return; }
+      var cadre = 12;
+      var col = (flottante.offsetHeight - 2 - cadre) * img.naturalWidth / img.naturalHeight + cadre;
+      var rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      flottante.style.setProperty("--une-col", Math.min(col, window.innerWidth - 24.4 * rem) + "px");
+    };
+    window.addEventListener("resize", ajusterImageUne);
     var montrerFlottante = function () {
       if (!flottante) return;
       var id = flottante.getAttribute("data-evt-id");
       if (flottante.getAttribute("data-evt-fin") < jourIso || dejaFermee(id)) { flottante.hidden = true; return; }
       flottante.hidden = false;
+      ajusterImageUne();
       requestAnimationFrame(function () { flottante.classList.add("visible"); });
     };
     if (flottante) {
@@ -1158,6 +1170,7 @@
         image.className = "une-image";
         image.src = e.image;
         image.alt = "";
+        image.addEventListener("load", ajusterImageUne);
         flottante.insertBefore(image, flottante.firstChild);
       }
       var badge = flottante.querySelector(".evt-badge");
