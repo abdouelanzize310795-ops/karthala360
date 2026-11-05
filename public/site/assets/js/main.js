@@ -1110,7 +1110,7 @@
       var quand = dateTexte(e.debut) + (e.fin && e.fin !== e.debut ? T(" au ", " to ") + dateTexte(e.fin) : "") + (e.heure && e.heure[L] ? ", " + e.heure[L] : "");
       var lien = /^https?:\/\//.test(e.lien || "") ? e.lien : lienWhatsApp(T("Bonjour Discovermores, je souhaite participer à : ", "Hello Discovermores, I would like to take part in: ") + e.titre[L] + " (" + quand + ").");
       var d = new Date(e.debut + "T12:00:00");
-      var visuel = /^https?:\/\//.test(e.image || "") ? "<img src='" + echapper(e.image) + "' alt='" + echapper(e.titre[L]) + "' loading='lazy'>"
+      var visuel = /^(https?:\/\/|\/uploads\/)/.test(e.image || "") ? "<img src='" + echapper(e.image) + "' alt='" + echapper(e.titre[L]) + "' loading='lazy'>"
         : "<div class='evt-date' aria-hidden='true'><b>" + d.getDate() + "</b><span>" + MOIS_C[d.getMonth()] + "</span></div>";
       return "<article class='evt" + (grande ? " evt-grande" : "") + "' data-evt-fin='" + echapper(e.fin || e.debut) + "'>" +
         "<div class='evt-visuel'>" + visuel + "</div><div class='evt-corps'><div class='evt-badges'>" +
@@ -1148,6 +1148,18 @@
       flottante.querySelector("[data-une-desc]").textContent = e.description[L];
       flottante.querySelector("[data-une-lien]").href = /^https?:\/\//.test(e.lien || "") ? e.lien
         : lienWhatsApp(T("Bonjour Discovermores, je souhaite participer à : ", "Hello Discovermores, I would like to take part in: ") + e.titre[L] + " (" + quand + ").");
+      // Colonne image à gauche : seulement si l’activité a une image
+      var ancienne = flottante.querySelector(".une-image");
+      if (ancienne) ancienne.remove();
+      var avecImage = /^(https?:\/\/|\/uploads\/)/.test(e.image || "");
+      flottante.classList.toggle("avec-image", avecImage);
+      if (avecImage) {
+        var image = document.createElement("img");
+        image.className = "une-image";
+        image.src = e.image;
+        image.alt = "";
+        flottante.insertBefore(image, flottante.firstChild);
+      }
       var badge = flottante.querySelector(".evt-badge");
       if (badge) badge.remove();
       if (e.type === "partenaire") flottante.querySelector(".une-surtitre").insertAdjacentHTML("beforeend", " <span class='evt-badge partenaire'>" + T("Partenaire", "Partner") + "</span>");
