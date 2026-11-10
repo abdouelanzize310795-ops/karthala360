@@ -210,8 +210,12 @@ function migrer() {
   if (get('SELECT COUNT(*) n FROM formules').n === 0) {
     for (const f of FORMULES_V2) db.run('INSERT INTO formules (code,nom,nom_en,prix,type,supp,contrib,age_min,min_pers,ordre) VALUES (?,?,?,?,?,?,?,?,?,?)', f);
   }
-  if (get('SELECT COUNT(*) n FROM produits').n === 0) {
-    for (const p of PRODUITS_V2) db.run('INSERT INTO produits (code,nom,prix) VALUES (?,?,?)', p);
+  // Produits de départ : créés une seule fois, à l'installation. Une boutique vidée dans le back office reste vide.
+  if (!get("SELECT 1 x FROM settings WHERE key='produits_initialises'")) {
+    if (get('SELECT COUNT(*) n FROM produits').n === 0) {
+      for (const p of PRODUITS_V2) db.run('INSERT INTO produits (code,nom,prix) VALUES (?,?,?)', p);
+    }
+    db.run("INSERT INTO settings (key,value) VALUES ('produits_initialises','1')");
   }
   // Comptes encore sur un mot de passe par défaut : changement imposé à la prochaine connexion
   for (const u of all('SELECT id, password_hash FROM users WHERE doit_changer=0')) {

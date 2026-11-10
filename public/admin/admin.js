@@ -496,7 +496,7 @@
     const aide = {
       sorties: 'Une sortie est créée automatiquement dès qu\'un randonneur s\'enregistre avec le QR code (code formule + date). Ouvrez-la pour remplir la fiche du guide.',
       avis: 'Les retours d\'expérience avec accord de publication arrivent ici, non publiés : relisez puis cochez « Publié ».',
-      produits: 'Les produits ajoutés apparaissent sur la page Boutique (français et anglais) avec photo, tailles et bouton de commande WhatsApp. Pour les 7 produits d\'origine (★), seuls le prix, le stock et la disponibilité se modifient.',
+      produits: 'Les produits apparaissent sur la page Boutique (français et anglais) avec photo, choix et bouton de commande. Tous se modifient (photo comprise) et se suppriment ici ; la rubrique choisit la liste où le produit apparaît.',
       commandes: 'Les commandes passées avec le panier du site arrivent ici avec leur référence (B…). Celles reçues sur WhatsApp peuvent être ajoutées à la main. Une commande annulée remet ses articles en stock.',
       partenaires: 'Rubrique « Avec le soutien de » : logos du pied de page, sur toutes les pages. Les deux autres rubriques remplacent les emplacements vides de la page Partenaires et de la section « Ils nous font confiance » de l’accueil. Logo conseillé : PNG ou SVG sur fond transparent ou blanc.',
       photos: 'Les photos publiées apparaissent en tête de la galerie, dans une rubrique « Dernières photos ».',
@@ -504,7 +504,7 @@
     const titre = (c) => (c === 'created_at' ? 'Date' : c === 'confirmation_info' ? 'E-mail au client' : c === 'nom' && name === 'produits' ? 'Nom' : def.fields.find((f) => f[0] === c)?.[1] || c);
     v.innerHTML = `<h2>${def.title}</h2><div class="bar">${aide ? `<span class="mu">${aide}</span>` : ''}<span class="sp"></span><button class="b-p" id="add">+ Ajouter</button></div>
       <div class="panel"><table><tr>${def.cols.map((c) => `<th>${esc(titre(c))}</th>`).join('')}<th></th></tr>
-      ${rows.map((r) => `<tr>${def.cols.map((c) => `<td>${c === 'nom' && r.origine ? '★ ' : ''}${cell(r, c)}</td>`).join('')}<td style="white-space:nowrap">${name === 'sorties' ? `<a class="b b-sm" href="#sorties/${r.id}">Fiche & liste</a> <a class="b b-sm" href="/api/admin/pdf/sortie/${r.id}" target="_blank" rel="noopener">📄 PDF</a> ` : ''}${name === 'produits' && !r.origine ? `<a class="b b-sm" href="/boutique#${esc(r.code)}" target="_blank">Voir</a> ` : ''}<button class="b-sm" data-ed="${r.id}">Modifier</button>${r.origine ? '' : ` <button class="b-sm b-d" data-del="${r.id}">✕</button>`}</td></tr>`).join('') || `<tr><td colspan="9" class="mu">Rien pour l'instant</td></tr>`}</table></div>`;
+      ${rows.map((r) => `<tr>${def.cols.map((c) => `<td>${c === 'nom' && r.origine && name !== 'produits' ? '★ ' : ''}${cell(r, c)}</td>`).join('')}<td style="white-space:nowrap">${name === 'sorties' ? `<a class="b b-sm" href="#sorties/${r.id}">Fiche & liste</a> <a class="b b-sm" href="/api/admin/pdf/sortie/${r.id}" target="_blank" rel="noopener">📄 PDF</a> ` : ''}${name === 'produits' ? `<a class="b b-sm" href="/boutique#${esc(r.code)}" target="_blank">Voir</a> ` : ''}<button class="b-sm" data-ed="${r.id}">Modifier</button>${r.origine && name !== 'produits' ? '' : ` <button class="b-sm b-d" data-del="${r.id}">✕</button>`}</td></tr>`).join('') || `<tr><td colspan="9" class="mu">Rien pour l'instant</td></tr>`}</table></div>`;
     if ($('#add')) $('#add').onclick = () => editDialog(name, {});
     v.querySelectorAll('[data-ed]').forEach((b) => b.onclick = () => editDialog(name, rows.find((r) => r.id == b.dataset.ed)));
     v.querySelectorAll('[data-del]').forEach((b) => b.onclick = async () => { if (confirm('Supprimer ?')) { await api(`/admin/${name}/${b.dataset.del}`, { method: 'DELETE' }); shell(); } });
@@ -526,9 +526,7 @@
   }
 
   function editDialog(name, row) {
-    let def = CRUD[name];
-    // Produit d'origine : sa fiche est écrite dans la page, seuls prix, stock et disponibilité se règlent
-    if (name === 'produits' && row.origine) def = { ...def, fields: def.fields.filter(([k]) => ['prix', 'stock', 'disponible'].includes(k)) };
+    const def = CRUD[name];
     const defautVrai = new Set(['publie', 'disponible']);
     const input = ([k, label, type]) => {
       const v = row[k] ?? (type === 'bool' && defautVrai.has(k) && name !== 'avis' ? 1 : '');
