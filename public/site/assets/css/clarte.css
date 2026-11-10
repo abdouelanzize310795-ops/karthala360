@@ -78,3 +78,9 @@ html.clarte:not([data-theme="nuit"]){
 
 /* ---------- Mode nuit : on garde la lisibilité (polices, boutons), les couleurs sombres restent ---------- */
 [data-theme="nuit"].clarte .bouton.secondaire{color:#E6ECE7}
+
+/* Bouton « Réserver » de l'en-tête : texte blanc sur le vert (le style des liens du menu ne s'applique pas) */
+.clarte:not([data-theme="nuit"]) .entete a.bouton,.clarte:not([data-theme="nuit"]) .entete a.bouton:hover{color:#fff}
+/* Boutons secondaires dans le bandeau d'appel (fond vert-bleu) : texte blanc */
+.clarte:not([data-theme="nuit"]) .appel .bouton.secondaire{color:#fff;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.7)}
+.clarte:not([data-theme="nuit"]) .appel .bouton.secondaire:hover{background:#fff;color:#12606C}

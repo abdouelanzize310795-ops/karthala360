@@ -1030,8 +1030,9 @@ body:has(.k269-flottant) .une-flottante{bottom:5.6rem}
 .bandeau-logos .surtitre{margin-bottom:1.2rem}
 .grille-logos{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(9.5rem,100%),1fr));gap:.8rem;margin-bottom:1.2rem}
 .logo-case{display:grid;place-items:center;height:5.2rem;padding:.8rem 1rem;border-radius:var(--r-moyen);background:#FFFFFF;border:1px solid var(--trait)}
-.logo-case img{max-width:100%;max-height:3rem;object-fit:contain;filter:grayscale(1);opacity:.8;transition:filter .2s,opacity .2s}
-a.logo-case:hover img,a.logo-case:focus-visible img{filter:none;opacity:1}
+/* Logos tiers : toujours en couleurs d’origine, sur leur pastille blanche, quel que soit le mode */
+.logo-case img,[data-theme="nuit"] .logo-case img{filter:none!important;opacity:1!important;mix-blend-mode:normal!important}
+.logo-case img{max-width:100%;max-height:3rem;object-fit:contain}
 .logo-case.grand{height:7rem;width:11rem;flex:none}
 .logo-case.grand img{max-height:4.4rem}
 .logo-case.vide{background:transparent;border:1.5px dashed rgba(155,165,157,.55);color:#9BA59D;text-align:center;gap:.1rem;align-content:center}
@@ -1118,3 +1119,20 @@ a.logo-case:hover img,a.logo-case:focus-visible img{filter:none;opacity:1}
 
 /* Accueil sur téléphone : la barre fixe « Réserver · WhatsApp » suffit, le bouton « Réserver une date » de l’en-tête disparaît */
 @media (max-width:767px){.heros .boutons .heros-resa{display:none}}
+
+/* ===== Contrastes (WCAG AA) vérifiés en mode clair et en mode nuit ===== */
+/* Bandeau d'appel : le dégradé finit sur un bleu-vert plus sombre, le texte blanc reste lisible partout */
+.appel{background:radial-gradient(circle at 90% 10%,rgba(255,255,255,.12),transparent 22rem),linear-gradient(135deg,#1E6B3A 0%,#12606C 100%)}
+.appel p.petit,.appel .petit{color:rgba(255,255,255,.88)}
+/* Bouton « Ajouter au panier » : texte blanc sur le vert (voir plus bas) */
+/* Liens et titres verts posés sur un fond sombre : vert clair */
+.fond-sombre .carte-pied .lien-wa,.recap .surtitre,.datapro thead th:last-child{color:var(--neon)}
+/* Étoiles des avis : ambre foncé sur fond clair */
+.avis-compact .etoiles,.fond-blanc .avis .etoiles{color:#8A5A00}
+[data-theme="nuit"] .avis-compact .etoiles,[data-theme="nuit"] .fond-blanc .avis .etoiles{color:var(--ambre)}
+/* Champ obligatoire (*) lisible en mode nuit */
+[data-theme="nuit"] .requis{color:#FF8E70}
+.appel .petit{color:rgba(255,255,255,.88)!important}
+.produit .carte-pied .bouton.panier-ajout,.produit .carte-pied .bouton.panier-ajout:hover{color:#fff!important}
+/* Mode nuit : les chiffres du compteur (fond sombre) restent en vert clair, sans pavé dégradé derrière */
+[data-theme="nuit"] .fond-sombre .indicateurs b{background-image:none}
