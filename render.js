@@ -449,11 +449,33 @@ function creer(SITE, db) {
     return html.replace(/(<body[^>]*>)/i, `$1${bandeau}`);
   }
 
+  // Menu principal, le même sur toutes les pages : Expériences · Préparer · Le Karthala · Contact · EN · Réserver.
+  // Les autres rubriques (Préserver, Agenda, Observatoire, Partenaires, Boutique, Paiement…) sont dans le pied de page.
+  const MENU = {
+    fr: [['formules.html', 'Expériences', ['formules.html']], ['preparer.html', 'Préparer', ['preparer.html']],
+      ['decouvrir.html', 'Le Karthala', ['decouvrir.html', 'volcan-eruptions.html', 'faune-flore.html', 'recits-legendes.html', 'galerie.html', 'ascension.html']],
+      ['contact.html', 'Contact', ['contact.html']]],
+    en: [['tours.html', 'Experiences', ['en/tours.html']], ['prepare.html', 'Prepare', ['en/prepare.html']],
+      ['volcano.html', 'Mount Karthala', ['en/volcano.html', 'en/volcano-eruptions.html', 'en/wildlife-plants.html', 'en/stories-legends.html', 'en/gallery.html', 'en/ascent.html']],
+      ['contact.html', 'Contact', ['en/contact.html']]],
+  };
+  function menu(html, rel, en) {
+    return html.replace(/(<nav class="nav" id="nav" aria-label="[^"]*">)([\s\S]*?)(<\/nav>)/, (m, debut, contenu, fin) => {
+      const langue = (contenu.match(/<a class="langue"[^>]*>[^<]*<\/a>/) || [''])[0];
+      const liens = MENU[en ? 'en' : 'fr'].map(([href, nom, pages]) =>
+        `<a href="${href}"${pages.includes(rel) ? ' aria-current="page"' : ''}>${nom}</a>`);
+      const resa = en ? '<a class="bouton" href="book.html">Book</a>' : '<a class="bouton" href="reservation.html">Réserver</a>';
+      return `${debut}\n      ${[...liens, langue, resa].filter(Boolean).join('\n      ')}\n    ${fin}`;
+    }).replace('<a href="observatoire.html">Espace Data</a>', '<a href="observatoire.html">Observatoire</a>')
+      .replace('<a href="gps-tracks.html">Data space and GPS tracks</a>', '<a href="gps-tracks.html">Observatory</a>');
+  }
+
   // Page HTML du site, réglages appliqués ; base = adresse publique du site (https://domaine)
   function page(rel, base) {
     const s = Object.fromEntries(db.all('SELECT key,value FROM settings').map((r) => [r.key, r.value]));
     const en = rel.startsWith('en/');
     let html = source(rel);
+    html = menu(html, rel, en);
     html = adresses(html, base);
     if (rel === 'qr-codes.html') html = qr(html, base); // après les adresses : le QR contient déjà la bonne
     html = reseaux(html, s);

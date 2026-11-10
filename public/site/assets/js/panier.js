@@ -40,7 +40,7 @@
   };
   var total = function () { return panier.reduce(function (s, l) { return s + prixDe(l) * l.quantite; }, 0); };
 
-  // ---------- Bouton de l'en-tête ----------
+  // ---------- Bouton du panier (flottant) ----------
   var SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 11.2a1.5 1.5 0 0 0 1.5 1.2h8.6a1.5 1.5 0 0 0 1.5-1.1L21 8H6.2"/><circle cx="9.5" cy="20" r="1.3"/><circle cx="17.5" cy="20" r="1.3"/></svg>';
   var bouton = el("button", { type: "button", "class": "panier-bouton", "aria-haspopup": "dialog" });
   bouton.innerHTML = SVG; // icône fixe, écrite ici
@@ -55,9 +55,9 @@
     bouton.title = bouton.getAttribute("aria-label");
     bouton.hidden = !n && !surBoutique; // hors boutique, le bouton n'apparaît que si le panier contient quelque chose
   }
-  var place = document.querySelector(".entete [data-theme-bascule]");
-  if (place) place.insertAdjacentElement("afterend", bouton);
-  else { bouton.style.cssText = "position:fixed;top:1rem;right:1rem;z-index:60"; document.body.appendChild(bouton); }
+  // Hors de l'en-tête : bouton flottant en bas à gauche (visible seulement s'il y a des articles, ou sur la boutique)
+  bouton.classList.add("panier-flottant");
+  document.body.appendChild(bouton);
   majBouton();
 
   // ---------- Message bref ----------
