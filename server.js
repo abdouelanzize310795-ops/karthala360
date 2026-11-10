@@ -20,7 +20,7 @@ const RESOURCES = {
   soumissions: ['traite'],
   questions: [],
   savoirs: ['langue', 'titre', 'texte', 'lien', 'publie'],
-  avis: ['auteur', 'pays', 'formule', 'note', 'texte', 'mois', 'publie'],
+  avis: ['auteur', 'pays', 'pays_en', 'formule', 'note', 'texte', 'texte_en', 'mois', 'publie'],
   evenements: ['titre_fr', 'titre_en', 'lieu_fr', 'lieu_en', 'description_fr', 'description_en', 'heure_fr', 'heure_en', 'debut', 'fin', 'type', 'organisateur', 'lien', 'image', 'prix', 'niveau_fr', 'niveau_en', 'places', 'a_la_une', 'publie'],
   sorties: ['code', 'formule', 'date', 'guide', 'statut', 'decision', 'meteo', 'terrain', 'heure_depart', 'heure_retour', 'dechets_kg', 'observations'],
   formules: ['code', 'sigle', 'nom', 'nom_en', 'description', 'description_en', 'prix', 'type', 'supp', 'contrib', 'age_min', 'min_pers', 'actif', 'ordre'],
@@ -373,7 +373,7 @@ init().then((db) => {
   app.get(ENDPOINT, (req, res) => {
     const a = req.query.action;
     if (a === 'stats') return res.json({ ok: true, stats: stats() });
-    if (a === 'avis') return res.json({ ok: true, avis: db.all('SELECT auteur,pays,formule,note,texte,mois FROM avis WHERE publie=1 ORDER BY id DESC LIMIT 30') });
+    if (a === 'avis') return res.json({ ok: true, avis: db.all('SELECT auteur,pays,pays_en,formule,note,texte,texte_en,mois FROM avis WHERE publie=1 ORDER BY id DESC LIMIT 30') });
     if (a === 'savoirs') {
       const l = req.query.langue === 'en' ? 'en' : 'fr';
       return res.json({ ok: true, savoirs: db.all('SELECT titre,texte,lien FROM savoirs WHERE publie=1 AND langue=?', [l]).map((s) => ({ t: 'Réponse de l’équipe', h: s.titre, u: (s.lien || (l === 'en' ? 'ask' : 'question')).replace(/\.html(?=$|[?#])/, ''), x: s.texte })) });

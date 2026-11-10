@@ -171,6 +171,8 @@ const COLONNES_V2 = [
   // Envoi automatique du bon de réservation au client (date d'envoi, ou raison du non-envoi)
   ['reservations', 'bon_envoye_le TEXT'], ['reservations', 'bon_envoi_info TEXT'], ['reservations', 'groupe TEXT'], ['commandes', 'groupe TEXT'], ['commandes', 'confirmation_envoyee_le TEXT'], ['commandes', 'confirmation_info TEXT'],
   // Agenda : prix, niveau et places affichés seulement s'ils sont renseignés
+  // Avis : traduction anglaise (sans elle, l'avis n'apparaît pas sur les pages anglaises)
+  ['avis', 'texte_en TEXT'], ['avis', 'pays_en TEXT'],
   ['evenements', 'prix TEXT'], ['evenements', 'niveau_fr TEXT'], ['evenements', 'niveau_en TEXT'], ['evenements', 'places TEXT'],
   ['formules', 'origine INTEGER DEFAULT 0'], ['formules', 'description TEXT'], ['formules', 'description_en TEXT'], ['formules', 'sigle TEXT'],
 ];

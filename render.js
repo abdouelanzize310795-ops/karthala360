@@ -268,7 +268,10 @@ function creer(SITE, db) {
     en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] };
   function avisAccueil(html, en) {
     if (!/data-avis-zone="accueil"/.test(html)) return html;
-    const avis = db.all('SELECT auteur,pays,formule,note,texte,mois FROM avis WHERE publie=1 ORDER BY id DESC LIMIT 12');
+    // Pages anglaises : seulement les avis traduits dans le back office (Texte EN), les autres sont masqués
+    const avis = db.all('SELECT auteur,pays,pays_en,formule,note,texte,texte_en,mois FROM avis WHERE publie=1 ORDER BY id DESC LIMIT 30')
+      .filter((a) => !en || String(a.texte_en || '').trim()).slice(0, 12)
+      .map((a) => (en ? { ...a, texte: a.texte_en, pays: a.pays_en || a.pays } : a));
     if (!avis.length) return html.replace(/(<section[^>]*data-avis-zone="accueil")/, '$1 hidden');
     const noms = Object.fromEntries(db.all('SELECT code,nom,nom_en FROM formules').map((f) => [f.code, (en && f.nom_en) || f.nom]));
     const cartes = avis.map((a) => {

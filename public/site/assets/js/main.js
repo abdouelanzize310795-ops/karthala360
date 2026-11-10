@@ -591,7 +591,11 @@
         if (!d || !d.ok || !d.avis || !d.avis.length) return;
         zonesAvis.forEach(function (zone) {
           var type = zone.getAttribute("data-avis-zone"), max = +zone.getAttribute("data-max") || 3;
-          var lst = d.avis.filter(function (a) { return type !== "formule" || a.formule === zone.getAttribute("data-formule"); }).slice(0, max);
+          var lst = d.avis.filter(function (a) { return type !== "formule" || a.formule === zone.getAttribute("data-formule"); })
+            // Pages anglaises : seulement les avis traduits (Texte EN du back office)
+            .filter(function (a) { return !EN || (a.texte_en && a.texte_en.trim()); })
+            .map(function (a) { return EN ? { auteur: a.auteur, pays: a.pays_en || a.pays, formule: a.formule, note: a.note, texte: a.texte_en, mois: a.mois } : a; })
+            .slice(0, max);
           if (!lst.length) return;
           // Les vrais avis remplacent les exemples de l’aperçu
           zone.querySelector("[data-avis-liste]").innerHTML = lst.map(function (a) { return carteAvis(a, type !== "accueil"); }).join("");

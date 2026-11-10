@@ -35,8 +35,8 @@
       ['prix', 'Prix par personne (ex. 45 €) — vide = non affiché'], ['niveau_fr', 'Niveau FR (ex. Difficile)'], ['niveau_en', 'Niveau EN (ex. Hard)'], ['places', 'Nombre de places'],
       ['a_la_une', 'À la une (carte flottante de l\'accueil)', 'bool'], ['publie', 'Publié', 'bool']] },
     avis: { title: 'Avis clients', cols: ['auteur', 'formule', 'note', 'texte', 'publie'], fields: [
-      ['auteur', 'Auteur'], ['pays', 'Pays'], ['formule', 'Formule', ['zero-effort', 'soft-trek', 'bivouac', 'sportif']], ['note', 'Note (1–5)', 'number'],
-      ['texte', 'Texte', 'textarea'], ['mois', 'Mois (AAAA-MM)'], ['publie', 'Publié sur le site', 'bool']] },
+      ['auteur', 'Auteur'], ['pays', 'Pays'], ['pays_en', 'Pays EN (ex. United Kingdom)'], ['formule', 'Formule', ['zero-effort', 'soft-trek', 'bivouac', 'sportif']], ['note', 'Note (1–5)', 'number'],
+      ['texte', 'Texte', 'textarea'], ['texte_en', 'Texte EN (traduction ; vide = avis masqué sur les pages anglaises)', 'textarea'], ['mois', 'Mois (AAAA-MM)'], ['publie', 'Publié sur le site', 'bool']] },
     savoirs: { title: 'K269 — réponses de l\'équipe', cols: ['langue', 'titre', 'publie'], fields: [
       ['langue', 'Langue', ['fr', 'en']], ['titre', 'Question / titre'], ['texte', 'Réponse (mettez aussi les mots que les visiteurs utilisent)', 'textarea'],
       ['lien', 'Page liée (ex. formules#bivouac)'], ['publie', 'Utilisée par K269', 'bool']] },
