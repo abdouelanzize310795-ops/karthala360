@@ -1211,6 +1211,19 @@
       if (e.type === "partenaire") flottante.querySelector(".une-surtitre").insertAdjacentHTML("beforeend", " <span class='evt-badge partenaire'>" + T("Partenaire", "Partner") + "</span>");
     };
 
+    // Bandeau d’une ligne sous le premier écran (téléphone) : titre, dates courtes et prix s’il est renseigné
+    var majBandeau = function (e) {
+      var bande = document.querySelector("[data-une-bandeau]");
+      if (!bande || !e || (e.fin || e.debut) < jourIso) return;
+      var L = EN ? "en" : "fr";
+      var court = function (iso) { var d = new Date(iso + "T12:00:00"); return d.getDate() + " " + MOIS_C[d.getMonth()]; };
+      var dates = court(e.debut) + (e.fin && e.fin !== e.debut ? "–" + court(e.fin) : "");
+      var quand = dateTexte(e.debut) + (e.fin && e.fin !== e.debut ? T(" au ", " to ") + dateTexte(e.fin) : "") + (e.heure && e.heure[L] ? ", " + e.heure[L] : "");
+      bande.querySelector("[data-une-bandeau-texte]").textContent = e.titre[L] + " · " + dates + (e.prix ? " · " + e.prix : "");
+      bande.querySelector("[data-une-bandeau-lien]").href = lienEvt(e, quand);
+      bande.hidden = false;
+    };
+
     var rangerEvt = function () {
       zonesEvt.forEach(function (zone) {
         zone.querySelectorAll("[data-evt-fin]").forEach(function (c) { if (c.getAttribute("data-evt-fin") < jourIso) c.remove(); });
@@ -1230,7 +1243,7 @@
         .then(function (d) {
           if (!d || !d.ok || !d.evenements || !d.evenements.length) return;
           var premiere = d.evenements.filter(function (e) { return e.a_la_une; })[0];
-          if (premiere) { majFlottante(premiere); montrerFlottante(); }
+          if (premiere) { majFlottante(premiere); montrerFlottante(); majBandeau(premiere); }
           zonesEvt.forEach(function (zone) {
             var liste = zone.querySelector("[data-evts]");
             if (!liste) return;

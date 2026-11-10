@@ -1144,3 +1144,11 @@ footer a:not(.bouton):not(.marque),.aujourdhui a,.une-actions a:not(.bouton),.li
 .bouton{min-height:44px}
 .trajet-fiche figcaption a{display:inline-flex;align-items:center;min-height:44px}
 .nav .bouton,.nav a.nav-cle,.carte-pied .bouton,.comparatif .bouton,.lien-langue-fiche,.une-actions .bouton{min-height:44px}
+
+/* Bandeau « À la une » d’une ligne sous le premier écran : sur téléphone seulement (la carte flottante reste sur ordinateur) */
+.bandeau-une{background:var(--nuit);color:#D5DCD7;border-bottom:1px solid rgba(103,220,139,.25)}
+.bandeau-une .conteneur{display:flex;align-items:center;gap:.6rem;min-height:44px;padding-top:.35rem;padding-bottom:.35rem;font-size:.9rem}
+.bandeau-une-label{flex:none;font-size:.68rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--neon)}
+.bandeau-une-texte{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bandeau-une-lien{flex:none;display:inline-flex;align-items:center;min-height:44px;color:var(--neon);font-weight:700}
+@media (min-width:768px){.bandeau-une{display:none!important}}
