@@ -85,3 +85,8 @@ html.clarte:not([data-theme="nuit"]){
 .clarte:not([data-theme="nuit"]) .appel .bouton.secondaire{color:#fff;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.7)}
 .clarte:not([data-theme="nuit"]) .appel .bouton.secondaire:hover{background:#fff;color:#12606C}
 .clarte .bouton,.clarte .carte-pied .bouton{min-height:44px}
+/* Logo du pied de page (fond sombre) : texte clair, et le nom collé au carré « K » */
+.pied .marque{display:inline-grid;justify-content:start}
+.clarte .pied .marque,.clarte:not([data-theme="nuit"]) .pied .marque{color:#fff}
+.clarte:not([data-theme="nuit"]) .pied .marque b span{color:var(--neon)}
+.clarte:not([data-theme="nuit"]) .pied .marque small{color:#A9B1AB}
