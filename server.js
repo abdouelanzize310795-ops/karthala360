@@ -24,7 +24,7 @@ const RESOURCES = {
   evenements: ['titre_fr', 'titre_en', 'lieu_fr', 'lieu_en', 'description_fr', 'description_en', 'heure_fr', 'heure_en', 'debut', 'fin', 'type', 'organisateur', 'lien', 'image', 'prix', 'niveau_fr', 'niveau_en', 'places', 'a_la_une', 'publie'],
   sorties: ['code', 'formule', 'date', 'guide', 'statut', 'decision', 'meteo', 'terrain', 'heure_depart', 'heure_retour', 'dechets_kg', 'observations'],
   formules: ['code', 'sigle', 'nom', 'nom_en', 'description', 'description_en', 'prix', 'type', 'supp', 'contrib', 'age_min', 'min_pers', 'actif', 'ordre'],
-  produits: ['code', 'nom', 'nom_en', 'description', 'description_en', 'image', 'tailles', 'badge', 'badge_en', 'prix', 'disponible', 'stock', 'ordre'],
+  produits: ['code', 'nom', 'nom_en', 'description', 'description_en', 'image', 'rubrique', 'tailles', 'tailles_en', 'choix_titre', 'choix_titre_en', 'unite', 'unite_en', 'badge', 'badge_en', 'prix', 'disponible', 'stock', 'ordre'],
   commandes: ['client', 'telephone', 'email', 'produit', 'detail', 'mode_remise', 'quantite', 'montant', 'statut', 'note'],
   partenaires: ['nom', 'niveau', 'description', 'description_en', 'logo', 'lien', 'ordre', 'publie'],
   photos: ['fichier', 'legende', 'legende_en', 'ordre', 'publie'],
@@ -1023,9 +1023,6 @@ ${contexte ? '\nPassages du site :\n' + contexte : ''}`;
       admin.delete(`/${name}/:id`, (req, res) => {
         if (name === 'formules' && db.get('SELECT origine FROM formules WHERE id=?', [req.params.id])?.origine) {
           return res.status(400).json({ error: "Formule d'origine du site : elle ne peut pas être supprimée, mais vous pouvez la désactiver (case « Active »)." });
-        }
-        if (name === 'produits' && db.get('SELECT origine FROM produits WHERE id=?', [req.params.id])?.origine) {
-          return res.status(400).json({ error: "Produit d'origine du site : il ne peut pas être supprimé, mais vous pouvez le marquer indisponible." });
         }
         if (name === 'photos') {
           const p = db.get('SELECT fichier FROM photos WHERE id=?', [req.params.id]);

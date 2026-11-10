@@ -45,7 +45,10 @@
       ['statut', 'Statut', ['planifiée', 'réalisée', 'annulée']]] },
     produits: { title: 'Boutique — produits', cols: ['image', 'nom', 'prix', 'disponible', 'stock'], fields: [
       ['nom', 'Nom FR'], ['nom_en', 'Nom EN'], ['description', 'Description FR', 'textarea'], ['description_en', 'Description EN', 'textarea'],
-      ['image', 'Photo', 'image'], ['prix', 'Prix (€)', 'number'], ['tailles', 'Tailles proposées, séparées par des virgules (facultatif, ex. S, M, L, XL)'],
+      ['image', 'Photo', 'image'], ['rubrique', 'Rubrique de la boutique', [['textile', 'Les maillots Karthala'], ['souvenirs', 'Garder le Karthala avec vous']]], ['prix', 'Prix (€)', 'number'],
+      ['unite', 'Prix affiché par (ex. l’unité, le fichier)'], ['unite_en', 'Prix affiché par, EN (ex. each, per file)'],
+      ['choix_titre', 'Titre du choix (ex. Taille, Itinéraire)'], ['choix_titre_en', 'Titre du choix EN (ex. Size, Route)'],
+      ['tailles', 'Choix proposés, séparés par des virgules (facultatif, ex. S, M, L, XL)'], ['tailles_en', 'Choix proposés EN (vide = les mêmes)'],
       ['badge', 'Badge sur la photo FR (facultatif, ex. Nouveau, Précommande)'], ['badge_en', 'Badge EN (ex. New, Pre-order)'], ['stock', 'Stock (facultatif)', 'number'],
       ['ordre', 'Ordre d\'affichage', 'number'], ['disponible', 'Disponible à la commande', 'bool']] },
     commandes: { title: 'Boutique — commandes', cols: ['created_at', 'ref', 'client', 'produit', 'montant', 'statut', 'confirmation_info'], fields: [

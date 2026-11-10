@@ -172,6 +172,8 @@ const COLONNES_V2 = [
   ['reservations', 'bon_envoye_le TEXT'], ['reservations', 'bon_envoi_info TEXT'], ['reservations', 'groupe TEXT'], ['commandes', 'groupe TEXT'], ['commandes', 'confirmation_envoyee_le TEXT'], ['commandes', 'confirmation_info TEXT'],
   // Agenda : prix, niveau et places affichés seulement s'ils sont renseignés
   // Avis : traduction anglaise (sans elle, l'avis n'apparaît pas sur les pages anglaises)
+  // Boutique entièrement gérée en base : rubrique, unité, titre et choix en anglais
+  ['produits', 'rubrique TEXT'], ['produits', 'unite TEXT'], ['produits', 'unite_en TEXT'], ['produits', 'choix_titre TEXT'], ['produits', 'choix_titre_en TEXT'], ['produits', 'tailles_en TEXT'],
   ['avis', 'texte_en TEXT'], ['avis', 'pays_en TEXT'],
   ['evenements', 'prix TEXT'], ['evenements', 'niveau_fr TEXT'], ['evenements', 'niveau_en TEXT'], ['evenements', 'places TEXT'],
   ['formules', 'origine INTEGER DEFAULT 0'], ['formules', 'description TEXT'], ['formules', 'description_en TEXT'], ['formules', 'sigle TEXT'],

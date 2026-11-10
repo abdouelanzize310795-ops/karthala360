@@ -158,24 +158,28 @@ function creer(SITE, db) {
   const boutonPanier = (p, nom, en) =>
     `<button type="button" class="bouton panier-ajout" data-ajout-panier data-code="${esc(p.code)}" data-nom="${esc(nom)}" data-prix="${Number(p.prix)}">${en ? 'Add to cart' : 'Ajouter au panier'}</button>`;
 
-  // Carte d'un produit ajouté depuis le back office, au même format que les cartes du site
+  // Carte d'un produit de la boutique, entièrement construite à partir du back office
   function carteProduit(p, en, wa) {
     const nom = (en && p.nom_en) || p.nom;
     const desc = (en && p.description_en) || p.description || '';
     const prix = en ? `€${p.prix}` : euros(p.prix);
-    const tailles = String(p.tailles || '').split(',').map((t) => t.trim()).filter(Boolean);
+    const liste = (v) => String(v || '').split(',').map((t) => t.trim()).filter(Boolean);
+    const tailles = (en && liste(p.tailles_en).length ? liste(p.tailles_en) : liste(p.tailles));
+    const titreChoix = (en && p.choix_titre_en) || p.choix_titre || (en ? 'Size' : 'Taille');
+    const unite = (en && p.unite_en) || p.unite || (en ? 'each' : 'l’unité');
+    const defaut = Math.max(0, tailles.indexOf('M'));
     const message = `${en ? 'Hello Discovermores, I would like to order: ' : 'Bonjour Discovermores, je souhaite commander : '}${nom}`;
-    const prefixe = en ? 'size ' : 'taille ';
+    const prefixe = titreChoix === (en ? 'Size' : 'Taille') ? (en ? 'size ' : 'taille ') : '';
     const suffixe = ` – ${prix}`;
-    const texte = tailles.length ? `${message} (${prefixe}${tailles[0]})${suffixe}.` : `${message}${suffixe}.`;
+    const texte = tailles.length ? `${message} (${prefixe}${tailles[defaut]})${suffixe}.` : `${message}${suffixe}.`;
     const lien = `https://wa.me/${wa}?text=${encodeURIComponent(texte).replace(/'/g, '%27')}`;
     const img = p.image ? `<img src="${esc(p.image)}" alt="${esc(nom)}" loading="lazy" decoding="async">` : '';
     const badge = !p.disponible ? (en ? 'Sold out' : 'Épuisé') : (en && p.badge_en) || p.badge;
     const choix = tailles.length
-      ? `<fieldset class="tailles"><legend>${en ? 'Size' : 'Taille'}</legend><div>${tailles.map((t, i) => `<label><input type="radio" name="choix-${esc(p.code)}" value="${esc(t)}"${i === 0 ? ' checked' : ''}><span>${esc(t)}</span></label>`).join('')}</div></fieldset>`
+      ? `<fieldset class="tailles"><legend>${esc(titreChoix)}</legend><div>${tailles.map((t, i) => `<label><input type="radio" name="choix-${esc(p.code)}" value="${esc(t)}"${i === defaut ? ' checked' : ''}><span>${esc(t)}</span></label>`).join('')}</div></fieldset>`
       : '';
     const bouton = p.disponible
-      ? boutonPanier(p, nom, en) + `<a class="lien-wa" href="${esc(lien)}"${tailles.length ? ` data-message="${esc(message)}" data-prefixe="${prefixe}" data-suffixe="${esc(suffixe)}"` : ''} rel="noopener">${en ? 'or order on WhatsApp' : 'ou commander sur WhatsApp'}</a>`
+      ? boutonPanier(p, nom, en) + `<a class="lien-wa" href="${esc(lien)}"${tailles.length ? ` data-message="${esc(message)}" data-prefixe="${esc(prefixe)}" data-suffixe="${esc(suffixe)}"` : ''} rel="noopener">${en ? 'or order on WhatsApp' : 'ou commander sur WhatsApp'}</a>`
       : `<span class="bouton secondaire" aria-disabled="true">${en ? 'Sold out' : 'Épuisé'}</span>`;
     return `<li class="carte produit" id="${esc(p.code)}">
   <div class="carte-photo">${img}${badge ? `<span class="pastille">${esc(badge)}</span>` : ''}</div>
@@ -183,54 +187,55 @@ function creer(SITE, db) {
     <h3>${esc(nom)}</h3>
     ${desc ? `<p>${esc(desc)}</p>` : ''}
     ${choix}
-    <div class="carte-pied${p.disponible ? ' avec-panier' : ''}"><div class="prix"><b>${prix}</b><span>${en ? 'each' : 'l’unité'}</span></div>${bouton}</div>
+    <div class="carte-pied${p.disponible ? ' avec-panier' : ''}"><div class="prix"><b>${prix}</b><span>${esc(unite)}</span></div>${bouton}</div>
   </div>
 </li>`;
   }
 
-  function boutique(html, en, s) {
-    // Produits ajoutés : à la fin de la dernière liste de la boutique (« Garder le Karthala avec vous »)
-    const ajoutes = db.all('SELECT * FROM produits WHERE origine=0 ORDER BY ordre, id');
-    if (ajoutes.length) {
-      const wa = String(s.whatsapp || WHATSAPP_ORIGINE).replace(/\D/g, '');
-      const listes = [...html.matchAll(/<ul class="cartes-formules boutique"[^>]*>/g)];
-      const derniere = listes[listes.length - 1];
-      if (derniere) {
-        const fin = html.indexOf('</ul>', derniere.index);
-        html = html.slice(0, fin) + ajoutes.map((p) => carteProduit(p, en, wa)).join('\n') + '\n' + html.slice(fin);
-      }
-    }
+  // Une seule fois : les 7 produits écrits dans la page d'origine passent en base (photo, textes FR et EN,
+  // tailles, rubrique, ordre). Seuls les champs encore vides sont remplis : rien de ce qui a été saisi n'est écrasé.
+  function produitsEnBase() {
+    if (db.get("SELECT 1 x FROM settings WHERE key='produits_en_base'")) return;
+    const lire = (rel) => {
+      const html = source(rel), cartes = {};
+      [...html.matchAll(/<ul class="cartes-formules boutique"[^>]*>([\s\S]*?)<\/ul>/g)].forEach((ul, n) => {
+        [...ul[1].matchAll(/<li class="carte produit" id="([\w-]+)">([\s\S]*?)<\/li>/g)].forEach((li, i) => {
+          const c = li[2], txt = (re) => ((c.match(re) || [])[1] || '').replace(/&amp;/g, '&').trim();
+          cartes[li[1]] = {
+            image: '/' + txt(/<img src="([^"]+)"/).replace(/^(\.\.\/)+/, ''), badge: txt(/<span class="pastille">([^<]*)<\/span>/),
+            nom: txt(/<h3>([^<]*)<\/h3>/), description: txt(/<\/h3>\s*<p>([^<]*)<\/p>/), choix: txt(/<legend>([^<]*)<\/legend>/),
+            tailles: [...c.matchAll(/<input type="radio"[^>]*value="([^"]*)"/g)].map((m) => m[1]).join(', '),
+            unite: txt(/<div class="prix"><b>[^<]*<\/b><span>([^<]*)<\/span>/), rubrique: n === 0 ? 'textile' : 'souvenirs', ordre: n * 10 + i + 1,
+          };
+        });
+      });
+      return cartes;
+    };
+    const fr = lire('boutique.html'), en = lire('en/shop.html');
     for (const p of db.all('SELECT * FROM produits WHERE origine=1')) {
-      const debut = html.indexOf(`<li class="carte produit" id="${p.code}">`);
-      if (debut < 0) continue;
-      const fin = html.indexOf('</li>', debut);
-      let carte = html.slice(debut, fin);
-      // Photo, nom, description et badge modifiés dans le back office : ils remplacent ceux de la page
-      if (p.image) carte = carte.replace(/<img src="[^"]*"([^>]*?) width="\d+" height="\d+"/, `<img src="${esc(p.image)}"$1`);
-      const nomPage = en ? p.nom_en : p.nom;
-      if (nomPage) carte = carte.replace(/<h3>[^<]*<\/h3>/, `<h3>${esc(nomPage)}</h3>`).replace(/(<img [^>]*alt=")[^"]*"/, `$1${esc(nomPage)}"`);
-      const desc = en ? p.description_en : p.description;
-      if (desc) carte = carte.replace(/(<\/h3>\s*)<p>[^<]*<\/p>/, `$1<p>${esc(desc)}</p>`);
-      const badge = en ? p.badge_en : p.badge;
-      if (badge) carte = carte.replace(/<span class="pastille">[^<]*<\/span>/, `<span class="pastille">${esc(badge)}</span>`);
-      // Prix affiché et prix repris dans le message WhatsApp de commande
-      carte = carte.replace(/(<div class="prix"><b>)[\d\s ,.]+ ?€(<\/b>)/, `$1${euros(p.prix)}$2`); // FR : « 30 € »
-      carte = carte.replace(/(<div class="prix"><b>€)[\d,.]+(<\/b>)/, `$1${p.prix}$2`); // EN : « €30 »
-      carte = carte.replace(/(%E2%80%93%20)\d+(?:[.,]\d+)?(%20%E2%82%AC)/g, `$1${p.prix}$2`);
-      carte = carte.replace(/(%E2%80%93%20%E2%82%AC)\d+(?:[.,]\d+)?/g, `$1${p.prix}`);
-      // Prix repris quand le client change de taille (data-suffixe lu par main.js)
-      carte = carte.replace(/(data-suffixe=" – )\d+(?:[.,]\d+)? €"/, `$1${p.prix} €"`).replace(/(data-suffixe=" – €)\d+(?:[.,]\d+)?"/, `$1${p.prix}"`);
-      if (!p.disponible) {
-        carte = carte.replace(/<a class="bouton whatsapp"[^>]*>[\s\S]*?<\/a>/, '<span class="bouton secondaire" aria-disabled="true">Épuisé · Sold out</span>');
-        carte = carte.replace(/<span class="pastille">[^<]*<\/span>/, '<span class="pastille">Épuisé</span>');
-      } else {
-        // Panier : bouton principal ; la commande WhatsApp reste possible en lien secondaire
-        const nom = ((carte.match(/<h3>([^<]*)<\/h3>/) || [])[1] || p.nom).trim();
-        carte = carte.replace(/<a class="bouton whatsapp"([^>]*)>[\s\S]*?<\/a>/, (m, attrs) =>
-          boutonPanier(p, nom.replace(/&amp;/g, '&'), en) + `<a class="lien-wa"${attrs}>${en ? 'or order on WhatsApp' : 'ou commander sur WhatsApp'}</a>`);
-        carte = carte.replace('<div class="carte-pied">', '<div class="carte-pied avec-panier">');
-      }
-      html = html.slice(0, debut) + carte + html.slice(fin);
+      const a = fr[p.code], b = en[p.code] || {};
+      if (!a) continue;
+      const valeurs = { image: a.image, badge: a.badge, badge_en: b.badge, nom_en: b.nom, description: a.description, description_en: b.description,
+        tailles: a.tailles, tailles_en: b.tailles, choix_titre: a.choix, choix_titre_en: b.choix, unite: a.unite, unite_en: b.unite, rubrique: a.rubrique };
+      for (const [k, v] of Object.entries(valeurs)) if (v && (p[k] === null || p[k] === undefined || p[k] === '')) db.run(`UPDATE produits SET ${k}=? WHERE id=?`, [v, p.id]);
+      if (!p.ordre) db.run('UPDATE produits SET ordre=? WHERE id=?', [a.ordre, p.id]);
+    }
+    db.run("UPDATE produits SET rubrique='souvenirs' WHERE rubrique IS NULL OR rubrique=''");
+    db.run("INSERT INTO settings (key,value) VALUES ('produits_en_base','1')");
+  }
+
+  // Boutique : toutes les cartes viennent du back office (Boutique — produits), rangées par rubrique
+  function boutique(html, en, s) {
+    produitsEnBase();
+    const wa = String(s.whatsapp || WHATSAPP_ORIGINE).replace(/\D/g, '');
+    const produits = db.all('SELECT * FROM produits ORDER BY ordre, id');
+    const listes = [...html.matchAll(/<ul class="cartes-formules boutique"[^>]*>/g)];
+    const rubriques = ['textile', 'souvenirs'];
+    for (let n = listes.length - 1; n >= 0; n--) {
+      const debut = listes[n].index + listes[n][0].length;
+      const fin = html.indexOf('</ul>', debut);
+      const ici = produits.filter((p) => (n === listes.length - 1 ? !rubriques.slice(0, n).includes(p.rubrique) : p.rubrique === rubriques[n]));
+      html = html.slice(0, debut) + '\n' + ici.map((p) => carteProduit(p, en, wa)).join('') + '\n    ' + html.slice(fin);
     }
     return html;
   }
