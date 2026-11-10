@@ -452,10 +452,10 @@ function creer(SITE, db) {
   // Menu principal, le même sur toutes les pages : Expériences · Préparer · Le Karthala · Contact · EN · Réserver.
   // Les autres rubriques (Préserver, Agenda, Observatoire, Partenaires, Boutique, Paiement…) sont dans le pied de page.
   const MENU = {
-    fr: [['formules.html', 'Expériences', ['formules.html']], ['preparer.html', 'Préparer', ['preparer.html']],
+    fr: [['formules.html', 'Expériences', ['formules.html', 'zero-effort.html', 'soft-trek.html', 'bivouac.html', 'karthala-sportif.html']], ['preparer.html', 'Préparer', ['preparer.html']],
       ['decouvrir.html', 'Le Karthala', ['decouvrir.html', 'volcan-eruptions.html', 'faune-flore.html', 'recits-legendes.html', 'galerie.html', 'ascension.html']],
       ['contact.html', 'Contact', ['contact.html']]],
-    en: [['tours.html', 'Experiences', ['en/tours.html']], ['prepare.html', 'Prepare', ['en/prepare.html']],
+    en: [['tours.html', 'Experiences', ['en/tours.html', 'en/zero-effort.html', 'en/soft-trek.html', 'en/bivouac.html', 'en/karthala-sportif.html']], ['prepare.html', 'Prepare', ['en/prepare.html']],
       ['volcano.html', 'Mount Karthala', ['en/volcano.html', 'en/volcano-eruptions.html', 'en/wildlife-plants.html', 'en/stories-legends.html', 'en/gallery.html', 'en/ascent.html']],
       ['contact.html', 'Contact', ['en/contact.html']]],
   };
