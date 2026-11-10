@@ -160,6 +160,22 @@
   </div>
 </section>
 
+<section class="section fond-blanc" id="quelle-formule">
+  <div class="conteneur">
+    <p class="surtitre">4 questions</p>
+    <h2>Quelle formule pour moi ?</h2>
+    <form class="quiz" data-quiz>
+      <script type="application/json" data-quiz-formules>{"zero-effort": {"nom": "Zéro Effort", "promesse": "Le cratère sans l’effort : idéal en famille ou si vous avez peu de temps.", "fiche": "formules.html#zero-effort", "resa": "reservation.html?formule=zero-effort", "age": 5}, "soft-trek": {"nom": "Soft Trek", "promesse": "Une vraie randonnée de 2 heures, sans la montée intégrale.", "fiche": "formules.html#soft-trek", "resa": "reservation.html?formule=soft-trek", "age": 8}, "bivouac": {"nom": "Bivouac au volcan", "promesse": "Une nuit au-dessus des nuages et le lever du soleil sur la caldeira.", "fiche": "formules.html#bivouac", "resa": "reservation.html?formule=bivouac", "age": 12}, "sportif": {"nom": "Karthala Sportif", "promesse": "Le Karthala en entier, de la forêt humide au bord du cratère.", "fiche": "formules.html#sportif", "resa": "reservation.html?formule=sportif", "age": 15}}</script>
+      <fieldset class="tailles quiz-q"><legend>Votre forme</legend><div><label><input type="radio" name="forme" value="peu" required><span>Peu habitué à marcher</span></label><label><input type="radio" name="forme" value="occasionnel" required><span>Marcheur occasionnel</span></label><label><input type="radio" name="forme" value="entraine" required><span>Randonneur entraîné</span></label></div></fieldset>
+      <fieldset class="tailles quiz-q"><legend>Votre temps</legend><div><label><input type="radio" name="temps" value="jour" required><span>Une journée</span></label><label><input type="radio" name="temps" value="deux" required><span>Deux jours, avec une nuit</span></label></div></fieldset>
+      <fieldset class="tailles quiz-q"><legend>Âge du plus jeune</legend><div><label><input type="radio" name="enfants" value="5" required><span>5 à 7 ans</span></label><label><input type="radio" name="enfants" value="8" required><span>8 à 11 ans</span></label><label><input type="radio" name="enfants" value="12" required><span>12 à 14 ans</span></label><label><input type="radio" name="enfants" value="non" required><span>15 ans et plus</span></label></div></fieldset><fieldset class="tailles quiz-q"><legend>Votre envie</legend><div><label><input type="radio" name="envie" value="cratere" required><span>Voir le cratère</span></label><label><input type="radio" name="envie" value="randonnee" required><span>Une vraie randonnée</span></label><label><input type="radio" name="envie" value="lever" required><span>Le lever du soleil</span></label><label><input type="radio" name="envie" value="pied" required><span>Tout à pied</span></label></div></fieldset>
+      <p class="petit">L’ascension n’est pas ouverte aux enfants de moins de 5 ans. Le résultat ouvre le formulaire de réservation avec la formule déjà choisie.</p>
+      <button class="bouton" type="submit">Voir ma formule</button>
+      <div class="quiz-resultat" data-quiz-resultat aria-live="polite" hidden></div>
+    </form>
+  </div>
+</section>
+
 
 
 <section class="section fond-sombre" id="avis" data-avis-zone="accueil" data-max="3">

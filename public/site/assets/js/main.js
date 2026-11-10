@@ -1296,17 +1296,20 @@
     quiz.addEventListener("submit", function (ev) {
       ev.preventDefault();
       var e = quiz.elements, forme = e.forme.value, temps = e.temps.value;
+      var envie = e.envie ? e.envie.value : "";                                    // cratère, randonnée, lever du soleil, tout à pied
       var age = e.enfants.value === "non" ? 99 : Number(e.enfants.value);        // âge du plus jeune
       var ouverte = function (c) { return formules[c].age <= age; };
       var ageDe = function (c) { return formules[c].age; };
       var code, pourquoi;
       if (temps === "deux" && forme !== "peu" && ouverte("bivouac")) {
-        code = "bivouac"; pourquoi = T("Vous avez le temps et la forme pour en profiter pleinement.", "You have the time and the fitness to make the most of it.");
-      } else if (forme === "entraine" && temps !== "deux" && ouverte("sportif")) {
+        code = "bivouac"; pourquoi = envie === "lever"
+          ? T("La nuit sur le volcan vous place au bord du cratère pour le lever du soleil.", "The night on the volcano puts you on the crater rim for the sunrise.")
+          : T("Vous avez le temps et la forme pour en profiter pleinement.", "You have the time and the fitness to make the most of it.");
+      } else if (forme === "entraine" && temps !== "deux" && envie !== "cratere" && ouverte("sportif")) {
         code = "sportif"; pourquoi = T("Vous avez le niveau pour l’ascension intégrale à pied.", "You are fit enough for the full climb on foot.");
       } else if (!ouverte("soft-trek")) {
         code = "zero-effort"; pourquoi = T("C’est la seule formule ouverte dès " + ageDe("zero-effort") + " ans.", "It is the only tour open from age " + ageDe("zero-effort") + ".");
-      } else if (forme === "peu") {
+      } else if (forme === "peu" || (envie === "cratere" && forme !== "entraine")) {
         code = "zero-effort";
         pourquoi = temps === "deux"
           ? T("Le bivouac demande une bonne forme. Avec Zéro Effort, le 4×4 fait l’essentiel : 25 minutes de marche seulement.", "The bivouac requires good fitness. With Zero Effort, the 4×4 does most of the work: only 25 minutes’ walking.")
@@ -1314,12 +1317,18 @@
       } else {
         code = "soft-trek";
         if (temps === "deux") pourquoi = T("Le bivouac est ouvert dès " + ageDe("bivouac") + " ans : en une journée, le Soft Trek offre le meilleur équilibre.", "The bivouac is open from age " + ageDe("bivouac") + ": in one day, the Soft Trek offers the best balance.");
+        else if (forme === "entraine" && envie === "cratere" && ouverte("sportif")) pourquoi = T("Vous voulez surtout le cratère : le 4×4 monte la première partie, vous gardez une vraie marche jusqu’au bord.", "You mainly want the crater: the 4×4 covers the first part, and you still walk properly up to the rim.");
         else if (forme === "entraine") pourquoi = T("L’ascension intégrale est ouverte dès " + ageDe("sportif") + " ans : avec vos enfants, le Soft Trek est la vraie randonnée du Karthala.", "The full climb is open from age " + ageDe("sportif") + ": with your children, the Soft Trek is the real Karthala hike.");
-        else pourquoi = T("Une vraie randonnée de 2 heures, accessible dès " + ageDe("soft-trek") + " ans.", "A real two-hour hike, open from age " + ageDe("soft-trek") + ".");
+        else pourquoi = T("Accessible dès " + ageDe("soft-trek") + " ans.", "Open from age " + ageDe("soft-trek") + ".");
       }
+      // Envie non comblée par la formule conseillée : on dit pourquoi
+      if (envie === "lever" && code !== "bivouac") pourquoi += " " + T("Le lever du soleil au sommet demande deux jours : c’est le Bivouac" + (ouverte("bivouac") ? "." : ", ouvert dès " + ageDe("bivouac") + " ans."), "The sunrise at the summit takes two days: that is the Bivouac" + (ouverte("bivouac") ? "." : ", open from age " + ageDe("bivouac") + "."));
+      if (envie === "pied" && code !== "sportif" && code !== "bivouac") pourquoi += " " + T("Tout à pied, c’est le Karthala Sportif" + (ouverte("sportif") ? ", pour randonneurs entraînés." : ", ouvert dès " + ageDe("sportif") + " ans."), "All on foot is the Full Climb" + (ouverte("sportif") ? ", for trained hikers." : ", open from age " + ageDe("sportif") + "."));
+      if (code === "zero-effort" && forme !== "peu" && envie === "cratere" && ouverte("soft-trek")) pourquoi = T("Le 4×4 vous amène au plus près : vous voyez le cratère avec 25 minutes de marche seulement.", "The 4×4 takes you as close as possible: you see the crater with only 25 minutes’ walking.");
       var f = formules[code];
       zone.innerHTML = "<p class='surtitre'>" + T("Notre conseil", "Our suggestion") + "</p><h3>" + f.nom + "</h3><p><b>" + f.promesse + "</b> " + pourquoi + "</p>" +
-        "<div class='boutons'><a class='bouton' href='" + f.resa + "'>" + T("Réserver cette formule", "Book this tour") + "</a>" +
+        // Le formulaire de réservation s’ouvre pré-rempli : formule choisie, et un enfant si le plus jeune a moins de 15 ans
+        "<div class='boutons'><a class='bouton' href='" + f.resa + (age < 99 ? "&enfants=1" : "") + "'>" + T("Réserver cette formule", "Book this tour") + "</a>" +
         "<a class='bouton secondaire' href='" + f.fiche + "'>" + T("Voir le détail", "See the details") + "</a></div>";
       zone.hidden = false;
       zone.setAttribute("tabindex", "-1"); zone.focus();
