@@ -205,6 +205,14 @@ function creer(SITE, db) {
       if (debut < 0) continue;
       const fin = html.indexOf('</li>', debut);
       let carte = html.slice(debut, fin);
+      // Photo, nom, description et badge modifiés dans le back office : ils remplacent ceux de la page
+      if (p.image) carte = carte.replace(/<img src="[^"]*"([^>]*?) width="\d+" height="\d+"/, `<img src="${esc(p.image)}"$1`);
+      const nomPage = en ? p.nom_en : p.nom;
+      if (nomPage) carte = carte.replace(/<h3>[^<]*<\/h3>/, `<h3>${esc(nomPage)}</h3>`).replace(/(<img [^>]*alt=")[^"]*"/, `$1${esc(nomPage)}"`);
+      const desc = en ? p.description_en : p.description;
+      if (desc) carte = carte.replace(/(<\/h3>\s*)<p>[^<]*<\/p>/, `$1<p>${esc(desc)}</p>`);
+      const badge = en ? p.badge_en : p.badge;
+      if (badge) carte = carte.replace(/<span class="pastille">[^<]*<\/span>/, `<span class="pastille">${esc(badge)}</span>`);
       // Prix affiché et prix repris dans le message WhatsApp de commande
       carte = carte.replace(/(<div class="prix"><b>)[\d\s ,.]+ ?€(<\/b>)/, `$1${euros(p.prix)}$2`); // FR : « 30 € »
       carte = carte.replace(/(<div class="prix"><b>€)[\d,.]+(<\/b>)/, `$1${p.prix}$2`); // EN : « €30 »
