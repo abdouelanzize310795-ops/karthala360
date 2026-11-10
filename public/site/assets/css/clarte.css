@@ -4,7 +4,7 @@
 /* ---------- Typographie très lisible (V75) ---------- */
 html.clarte{
   --titre:"Archivo","Arial Narrow",Arial,sans-serif;
-  --texte:"Atkinson Hyperlegible",Verdana,Arial,sans-serif;
+  --texte:"Archivo",Verdana,Arial,sans-serif;
   --r-petit:6px;
   --r-moyen:12px;
   --r-grand:16px;
@@ -84,3 +84,4 @@ html.clarte:not([data-theme="nuit"]){
 /* Boutons secondaires dans le bandeau d'appel (fond vert-bleu) : texte blanc */
 .clarte:not([data-theme="nuit"]) .appel .bouton.secondaire{color:#fff;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.7)}
 .clarte:not([data-theme="nuit"]) .appel .bouton.secondaire:hover{background:#fff;color:#12606C}
+.clarte .bouton,.clarte .carte-pied .bouton{min-height:44px}

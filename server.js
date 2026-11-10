@@ -747,15 +747,37 @@ ${contexte ? '\nPassages du site :\n' + contexte : ''}`;
     res.send(db.exporter());
   });
 
+  // Images envoyées de plus de 150 Ko : réduites à 1600 px de large au plus et recompressées, dans le même format
+  // (les PDF et e-mails n'acceptent que JPEG et PNG). Sans la bibliothèque d'images, l'original est gardé.
+  let sharp = null;
+  try { sharp = require('sharp'); } catch { console.warn('sharp absent : images envoyées gardées telles quelles'); }
+  async function alleger(buf, type) {
+    if (!sharp || buf.length <= 150 * 1024 || type === 'image/svg+xml') return buf;
+    try {
+      let meilleur = buf;
+      for (const largeur of [1600, 1280, 1024]) {
+        for (const q of [80, 70, 60]) {
+          const img = sharp(buf, { animated: false }).rotate().resize({ width: largeur, withoutEnlargement: true });
+          const sortie = await (type === 'image/png' ? img.png({ palette: true, quality: q, compressionLevel: 9 })
+            : type === 'image/webp' ? img.webp({ quality: q }) : img.jpeg({ quality: q, mozjpeg: true })).toBuffer();
+          if (sortie.length < meilleur.length) meilleur = sortie;
+          if (meilleur.length <= 150 * 1024) return meilleur;
+        }
+      }
+      return meilleur;
+    } catch { return buf; }
+  }
+
   // Envoi d'image (galerie, logos partenaires) : JSON { nom, data: base64 }
   const TYPES_IMAGE = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp', 'image/svg+xml': '.svg' };
-  admin.post('/upload', (req, res) => {
+  admin.post('/upload', async (req, res) => {
     const m = String(req.body?.data || '').match(/^data:(image\/[a-z+]+);base64,(.+)$/);
     if (!m || !TYPES_IMAGE[m[1]]) return res.status(400).json({ error: 'Image JPEG, PNG, WebP ou SVG attendue' });
-    const buf = Buffer.from(m[2], 'base64');
+    let buf = Buffer.from(m[2], 'base64');
     if (buf.length > 8 * 1024 * 1024) return res.status(400).json({ error: 'Image trop lourde (8 Mo maximum)' });
     const base = String(req.body.nom || 'image').toLowerCase().replace(/\.[a-z0-9]+$/, '').replace(/[^a-z0-9]+/g, '-').slice(0, 40) || 'image';
     const fichier = `${Date.now().toString(36)}-${base}${TYPES_IMAGE[m[1]]}`;
+    buf = await alleger(buf, m[1]);
     fs.writeFileSync(path.join(UPLOADS, fichier), buf);
     res.status(201).json({ fichier, url: `/uploads/${fichier}` });
   });

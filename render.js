@@ -318,6 +318,13 @@ function creer(SITE, db) {
   function prixCartes(html, en) {
     const parCode = Object.fromEntries(db.all('SELECT * FROM formules WHERE actif=1').map((f) => [f.code, f]));
     const eur = (n) => (en ? `€${n}` : `${n} €`);
+    // Chiffre clé de l'en-tête : le prix par personne le plus bas, à 4, et la formule concernée
+    const moinsCher = Object.values(parCode).filter((f) => f.type !== 'a-partir').sort((a, b) => prixPar(a, 4) - prixPar(b, 4))[0];
+    if (moinsCher) {
+      const nom = en ? moinsCher.nom_en || moinsCher.nom : moinsCher.nom;
+      html = html.replace(/<div class="verre"><small>(?:À partir de, à 4|From, for a group of 4)<\/small><b>[^<]*<\/b><\/div>/,
+        `<div class="verre"><small>${esc(nom)}, ${en ? 'for 4' : 'à 4'}</small><b>${en ? `From ${eur(prixPar(moinsCher, 4))} per person` : `Dès ${eur(prixPar(moinsCher, 4))} par personne`}</b></div>`);
+    }
     return html.replace(/<div class="prix"><b>[^<]*<\/b><span>[^<]*<\/span><span>[^<]*<\/span><\/div>(<a class="bouton" href="(?:reservation|book)\.html\?formule=([\w-]+)">)/g, (m, lien, code) => {
       const f = parCode[code];
       if (!f || f.type === 'a-partir') return m;
@@ -466,7 +473,13 @@ function creer(SITE, db) {
       .replace(/<\/body>/i, `<script src="/assets/js/panier.js?v=${VERSION}" defer></script>\n${PRECHARGEMENT}\n</body>`);
     // Style « Clarté » (inspiré de la V75) : activé dans Paramètres, ou essayé avec ?style=clarte (?style=original pour revenir)
     const clarte = s.style_site !== 'original'; // Clarté par défaut
-    html = html.replace(/<\/head>/i, `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,600..800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">\n<link rel="stylesheet" href="/assets/css/clarte.css?v=${VERSION}">\n<script>${STYLE_ESSAI}</script>\n</head>`);
+    // Une seule famille de polices par style : Archivo (Clarté, titres et texte) ou Manrope (Original)
+    const police = clarte ? 'Archivo:wdth,wght@75..100,400..800' : 'Manrope:wght@400;500;600;700;800';
+    html = html.replace(/<link href="https:\/\/fonts\.googleapis\.com\/css2\?family=Manrope[^"]*" rel="stylesheet">/,
+      `<link href="https://fonts.googleapis.com/css2?family=${police}&display=swap" rel="stylesheet">`)
+      .replace('Polices de caractères : Sora et Manrope, sous licence SIL Open Font License.', `Police de caractères : ${clarte ? 'Archivo' : 'Manrope'}, sous licence SIL Open Font License.`)
+      .replace('Typefaces: Sora and Manrope, under the SIL Open Font License.', `Typeface: ${clarte ? 'Archivo' : 'Manrope'}, under the SIL Open Font License.`);
+    html = html.replace(/<\/head>/i, `<link rel="stylesheet" href="/assets/css/clarte.css?v=${VERSION}">\n<script>${STYLE_ESSAI}</script>\n</head>`);
     if (clarte) html = html.replace(/<html([^>]*?)(\sclass="([^"]*)")?([^>]*)>/i, (m, a, c, cls, b) => `<html${a} class="${cls ? cls + ' ' : ''}clarte"${b}>`);
     // Chaque mise à jour du site force les navigateurs à recharger les styles et scripts (pas d'ancienne version en cache)
     html = html.replace(/(assets\/(?:css|js)\/[\w-]+\.(?:css|js))\?v=[\w]+/g, `$1?v=${VERSION}`);

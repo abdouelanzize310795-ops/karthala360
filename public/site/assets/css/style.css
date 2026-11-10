@@ -29,7 +29,7 @@
   --accent-texte:#1E7A3B;
   --trait-champ:#CAD4CC;
 
-  --titre:"Sora", "Segoe UI", Arial, sans-serif;
+  --titre:"Manrope", "Segoe UI", Arial, sans-serif;
   --texte:"Manrope", "Segoe UI", Arial, sans-serif;
 
   --largeur:76rem;
@@ -1136,3 +1136,11 @@ body:has(.k269-flottant) .une-flottante{bottom:5.6rem}
 .produit .carte-pied .bouton.panier-ajout,.produit .carte-pied .bouton.panier-ajout:hover{color:#fff!important}
 /* Mode nuit : les chiffres du compteur (fond sombre) restent en vert clair, sans pavé dégradé derrière */
 [data-theme="nuit"] .fond-sombre .indicateurs b{background-image:none}
+
+/* Zones cliquables d'au moins 44 px de haut (pied de page, liens isolés, boutons ronds de l'en-tête) */
+footer a:not(.bouton):not(.marque),.aujourdhui a,.une-actions a:not(.bouton),.lien-discret,.lien-fleche{display:inline-flex;align-items:center;min-height:44px}
+.theme-bascule,.panier-bouton{width:2.75rem;height:2.75rem;min-width:44px;min-height:44px}
+.marque{min-height:44px}
+.bouton{min-height:44px}
+.trajet-fiche figcaption a{display:inline-flex;align-items:center;min-height:44px}
+.nav .bouton,.nav a.nav-cle,.carte-pied .bouton,.comparatif .bouton,.lien-langue-fiche,.une-actions .bouton{min-height:44px}

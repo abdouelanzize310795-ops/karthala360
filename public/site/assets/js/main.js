@@ -1274,6 +1274,16 @@
     recap.hidden = !rempli;
     // De la confirmation à la page Paiement, le montant suit : le client n’a pas à le retrouver
     if (rempli) document.querySelectorAll("[data-suite-recap]").forEach(function (a) { a.href = a.getAttribute("href").split("?")[0] + window.location.search; });
+    // « Écrire sur WhatsApp » : message pré-rédigé avec le numéro de demande, la formule et la date
+    var waRecap = document.querySelector("[data-wa-recap]");
+    if (waRecap && rempli) {
+      var morceaux = [];
+      if (valeurs.id) morceaux.push(T("demande n° ", "request no. ") + valeurs.id);
+      if (valeurs.formule) morceaux.push(valeurs.formule);
+      if (valeurs.date) morceaux.push(valeurs.date);
+      if (valeurs.n) morceaux.push(valeurs.n);
+      waRecap.href = lienWhatsApp(T("Bonjour Discovermores, je reviens vers vous pour ma demande", "Hello Discovermores, I am following up on my request") + " (" + morceaux.join(", ") + ").");
+    }
   }
 
   /* ---------- « Quelle formule pour moi ? » ----------
