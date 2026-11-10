@@ -57,16 +57,6 @@ window.K360 = {
     "contrib": 2,
     "age_min": 15,
     "min_pers": 2
-  },
-  {
-    "code": "quad-buggy",
-    "nom": "Quad & Buggy",
-    "prix": 150,
-    "type": "a-partir",
-    "supp": 0,
-    "contrib": 0,
-    "age_min": null,
-    "min_pers": 1
   }
 ]
 };

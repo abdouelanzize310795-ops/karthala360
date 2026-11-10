@@ -97,12 +97,7 @@ function seed() {
   db.run('INSERT INTO users (email,name,password_hash,role) VALUES (?,?,?,?)', [adminEmail, 'Administrateur', hashPassword(adminPw), 'admin']);
   db.run('UPDATE users SET doit_changer=1 WHERE email=?', [adminEmail]);
 
-  db.run(`INSERT INTO evenements (titre_fr,titre_en,lieu_fr,lieu_en,description_fr,description_en,heure_fr,heure_en,debut,fin,organisateur,a_la_une)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,1)`, [
-    'Journée Karthala Zéro Déchets', 'Karthala Zero Waste Day', 'Sentier de Mvouni', 'Mvouni trail',
-    'Une matinée de ramassage des déchets sur le sentier du Karthala avec les guides de Discovermores. Gants et sacs fournis, collation offerte.',
-    'A morning of litter picking on the Karthala trail with the Discovermores guides. Gloves and bags provided, snack included.',
-    '7 h 00', '7:00 am', '2026-11-14', '2026-11-14', 'Discovermores']);
+  // Pas d'événement d'exemple : l'agenda se remplit depuis le back office
 
   const settings = {
     whatsapp: process.env.WHATSAPP_NUMBER || '2693565803',
@@ -175,6 +170,8 @@ const COLONNES_V2 = [
   // Formules : les 5 du site d'origine (origine = 1) ne se suppriment pas ; celles ajoutées depuis le back office oui
   // Envoi automatique du bon de réservation au client (date d'envoi, ou raison du non-envoi)
   ['reservations', 'bon_envoye_le TEXT'], ['reservations', 'bon_envoi_info TEXT'], ['reservations', 'groupe TEXT'], ['commandes', 'groupe TEXT'], ['commandes', 'confirmation_envoyee_le TEXT'], ['commandes', 'confirmation_info TEXT'],
+  // Agenda : prix, niveau et places affichés seulement s'ils sont renseignés
+  ['evenements', 'prix TEXT'], ['evenements', 'niveau_fr TEXT'], ['evenements', 'niveau_en TEXT'], ['evenements', 'places TEXT'],
   ['formules', 'origine INTEGER DEFAULT 0'], ['formules', 'description TEXT'], ['formules', 'description_en TEXT'], ['formules', 'sigle TEXT'],
 ];
 // Mots de passe connus (valeurs par défaut du projet) : jamais acceptés durablement
@@ -185,7 +182,6 @@ const FORMULES_V2 = [
   ['soft-trek', 'Soft Trek', 'Soft Trek', 250, 'forfait', 50, 7, 8, 1, 2],
   ['bivouac', 'Bivouac au volcan', 'Volcano Bivouac', 150, 'personne', null, 5, 12, 2, 3],
   ['sportif', 'Karthala Sportif', 'Full Climb', 90, 'personne', null, 2, 15, 2, 4],
-  ['quad-buggy', 'Quad & Buggy', 'Quad & Buggy', 150, 'a-partir', 0, 0, null, 1, 5],
 ];
 const PRODUITS_V2 = [
   ['maillot-obsidienne-gold', 'Édition Obsidienne Gold', 30], ['maillot-relief-rouge', 'Édition Relief Rouge', 30],
@@ -197,7 +193,7 @@ const SETTINGS_V2 = {
   paiement_virement: '', paiement_paypal: '', paiement_mvola: '', paiement_wakati: '',
   acompte_pct: '30', seuil_action: '500', fonds_ajustement: '0',
   tarif_agenda_evenement: '', tarif_agenda_semaine: '', tarif_datapro_rapport: '', tarif_datapro_abonnement: '',
-  assurance_contrat: '', alerte_niveau: '', alerte_message: '', notif_email: '',
+  assurance_contrat: '', alerte_niveau: '', alerte_message: '', alerte_date: '', alerte_source: '', mesure_outil: '', mesure_id: '', notif_email: '',
   site_url: process.env.SITE_URL || '', envoi_auto_bon: '1', style_site: 'clarte', lien_instagram: '', lien_facebook: '',
 };
 
@@ -220,6 +216,11 @@ function migrer() {
   db.run(`UPDATE formules SET origine=1 WHERE code IN (${FORMULES_V2.map(() => '?').join(',')})`, FORMULES_V2.map((f) => f[0]));
   db.run(`UPDATE produits SET origine=1 WHERE code IN (${PRODUITS_V2.map(() => '?').join(',')})`, PRODUITS_V2.map((p) => p[0]));
   for (const [k, v] of Object.entries(SETTINGS_V2)) db.run('INSERT OR IGNORE INTO settings (key,value) VALUES (?,?)', [k, v]);
+  // Une seule fois : le Quad & Buggy sort du site (formule désactivée, réactivable dans Tarifs)
+  if (!get("SELECT 1 x FROM settings WHERE key='quad_retire'")) {
+    db.run("UPDATE formules SET actif=0 WHERE code='quad-buggy'");
+    db.run("INSERT INTO settings (key,value) VALUES ('quad_retire','1')");
+  }
   // Une seule fois : le style Clarté devient celui du site (ensuite, le choix fait dans Paramètres est respecté)
   if (!get("SELECT 1 x FROM settings WHERE key='style_clarte_applique'")) {
     db.run("UPDATE settings SET value='clarte' WHERE key='style_site'");

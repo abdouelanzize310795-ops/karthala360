@@ -37,7 +37,10 @@ function cspPage(html, https) {
     const code = m[2].replace(/\r\n?/g, '\n');
     empreintes.push(`'sha256-${crypto.createHash('sha256').update(code, 'utf8').digest('base64')}'`);
   }
-  return [...BASE_CSP, `script-src 'self' ${[...new Set(empreintes)].join(' ')}`.trim(), ...(https ? ['upgrade-insecure-requests'] : [])].join('; ');
+  // Outil de mesure d'audience choisi dans Paramètres (Plausible ou Umami) : son script et ses envois sont autorisés
+  const mesure = [...new Set([...html.matchAll(/<script[^>]*\ssrc="(https:\/\/(?:plausible\.io|cloud\.umami\.is))\//gi)].map((m) => m[1]))];
+  const base = BASE_CSP.map((r) => (r === "connect-src 'self'" && mesure.length ? `${r} ${mesure.join(' ')}` : r));
+  return [...base, `script-src 'self' ${[...mesure, ...new Set(empreintes)].join(' ')}`.trim(), ...(https ? ['upgrade-insecure-requests'] : [])].join('; ');
 }
 
 // Fichiers envoyés depuis le back office : jamais exécutés, même ouverts seuls (un SVG peut contenir du code)

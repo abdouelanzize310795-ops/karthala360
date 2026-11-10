@@ -93,10 +93,11 @@
     return isNaN(d) ? iso : d.toLocaleDateString(LOCALE, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   }
 
-  /* ---------- Dates de sortie : pas de date passée ---------- */
+  /* ---------- Dates de sortie : au plus tôt dans 48 h ---------- */
   var aujourdhui = new Date(); aujourdhui.setMinutes(aujourdhui.getMinutes() - aujourdhui.getTimezoneOffset());
+  var dans48h = new Date(aujourdhui.getTime() + 2 * 24 * 60 * 60 * 1000);
   document.querySelectorAll('input[type="date"][name="date_souhaitee"]').forEach(function (el) {
-    el.min = aujourdhui.toISOString().slice(0, 10);
+    el.min = dans48h.toISOString().slice(0, 10);
   });
   // Fiche participant : la date du jour est proposée (le QR code est scanné au départ)
   document.querySelectorAll('input[type="date"][name="date_sortie"]').forEach(function (el) {
@@ -173,7 +174,7 @@
           : aideAge.getAttribute("data-defaut");
       }
       if (!f || n < 1) { zone.innerHTML = "<p class='est-detail'>" + T("Choisissez une formule et le nombre de participants pour voir une estimation.", "Choose a tour and the number of people to see an estimate.") + "</p>"; formResa.elements.estimation.value = ""; return; }
-      // Prix « à partir de » (nouveauté Quad & Buggy) : pas d’estimation ferme ni d’acompte chiffré, l’équipe confirme le prix
+      // Prix « à partir de » : pas d’estimation ferme ni d’acompte chiffré, l’équipe confirme le prix
       if (f.type === "a-partir") {
         zone.innerHTML =
           "<p class='est-ligne est-total'><span>" + T("Pour " + n + " personne" + (n > 1 ? "s" : "") + ", à partir de", "For " + n + (n > 1 ? " people" : " person") + ", from") + "</span>" +
@@ -190,10 +191,16 @@
         : n + " × " + euros(f.prix);
       var totalEstime = base + contrib;
       var acompte = Math.round(totalEstime * (C.acomptePct || 30)) / 100;
+      // D’abord le prix de la formule ; la contribution ne s’ajoute que si un montant est choisi
       zone.innerHTML =
-        "<p class='est-ligne est-total'><span>" + T("Estimation pour " + n + " personne" + (n > 1 ? "s" : ""), "Estimate for " + n + (n > 1 ? " people" : " person")) + "</span>" +
-          "<b>" + euros(totalEstime) + "</b></p>" +
-        "<p class='est-detail'>" + kmf(totalEstime) + " · " + detail + (contrib ? T(" ; contribution environnementale ", "; environmental contribution ") + euros(contrib) : "") + ".</p>" +
+        "<p class='est-ligne" + (contrib ? "" : " est-total") + "'><span>" + T("Prix pour " + n + " personne" + (n > 1 ? "s" : ""), "Price for " + n + (n > 1 ? " people" : " person")) + "</span>" +
+          "<b>" + euros(base) + "</b></p>" +
+        "<p class='est-detail'>" + kmf(base) + " · " + detail + ".</p>" +
+        (contrib
+          ? "<p class='est-ligne'><span>" + T("+ contribution environnementale", "+ environmental contribution") + "</span><b>+ " + euros(contrib) + "</b></p>" +
+            "<p class='est-ligne est-total'><span>" + T("Total estimé", "Estimated total") + "</span><b>" + euros(totalEstime) + "</b></p>" +
+            "<p class='est-detail'>" + kmf(totalEstime) + ".</p>"
+          : "") +
         "<p class='est-ligne est-acompte'><span>" + T("Acompte de " + (C.acomptePct || 30) + " %, après notre confirmation", (C.acomptePct || 30) + "% deposit, after our confirmation") + "</span>" +
           "<b>" + euros(acompte) + "</b></p>" +
         "<p class='est-detail'>" + T("Aucun paiement maintenant. <a href='paiement.html'>Moyens de paiement</a>", "No payment now. <a href='payment.html'>Payment methods</a>") + "</p>" +
@@ -538,6 +545,8 @@
     var etatStats = function (ok) {
       document.querySelectorAll("[data-si-donnees]").forEach(function (e) { e.hidden = !ok; });
       document.querySelectorAll("[data-si-vide]").forEach(function (e) { e.hidden = ok; });
+      // Toute la section disparaît tant qu’aucune sortie n’est enregistrée
+      document.querySelectorAll("[data-stats-zone][data-masquer-si-vide]").forEach(function (z) { z.hidden = !ok; });
     };
     etatStats(false);
     if (C.endpoint) {
@@ -658,7 +667,6 @@
       ["duration", "long", "hours", "hour", "minutes", "time", "take", "takes", "walking"],
       ["water", "drink", "drinking", "bottle", "food", "meal", "meals", "eat", "lunch"],
       ["pregnant", "pregnancy"],
-      ["quad", "quads", "buggy", "buggies", "atv"],
       ["group", "groups", "company", "school", "people"]
     ] : [
       ["altitude", "haut", "hauteur", "culminant", "metres", "sommet", "point"],
@@ -681,7 +689,6 @@
       ["legende", "legendes", "conte", "histoire", "recit", "djinns", "salomon"],
       ["eau", "boire", "potable", "gourde", "repas", "manger", "nourriture", "dejeuner"],
       ["enceinte", "grossesse"],
-      ["quad", "quads", "buggy", "buggys", "moto"],
       ["groupe", "groupes", "entreprise", "ecole", "association", "personnes"],
       ["duree", "temps", "heures", "heure", "longtemps", "minutes"]
     ];
@@ -1105,10 +1112,26 @@
     var JOURS_L = EN ? ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
                      : ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
     var dateTexte = function (iso) { var d = new Date(iso + "T12:00:00"); return JOURS_L[d.getDay()] + " " + d.getDate() + " " + MOIS_L[d.getMonth()] + " " + d.getFullYear(); };
+    // Lien « Je veux venir » : un lien WhatsApp sans message pré-rédigé est remplacé par le message de l’activité
+    var lienEvt = function (e, quand) {
+      var L = EN ? "en" : "fr";
+      var l = e.lien || "";
+      if (/^https?:\/\//.test(l) && !(/^https?:\/\/(wa\.me|api\.whatsapp\.com)\//.test(l) && !/[?&]text=/.test(l))) return l;
+      return lienWhatsApp(T("Bonjour Discovermores, je souhaite participer à : ", "Hello Discovermores, I would like to take part in: ") + e.titre[L] + " (" + quand + ").");
+    };
+    // Prix, niveau et places : affichés seulement s’ils sont renseignés dans le back office
+    var infosEvt = function (e) {
+      var L = EN ? "en" : "fr", morceaux = [];
+      if (e.prix) morceaux.push("<b>" + echapper(e.prix) + "</b>");
+      if (e.niveau && e.niveau[L]) morceaux.push(T("Niveau : ", "Level: ") + echapper(e.niveau[L]));
+      if (e.places) morceaux.push(echapper(e.places) + T(" places", " places"));
+      return morceaux.join(" · ");
+    };
     var carteEvt = function (e, grande) {
       var L = EN ? "en" : "fr";
       var quand = dateTexte(e.debut) + (e.fin && e.fin !== e.debut ? T(" au ", " to ") + dateTexte(e.fin) : "") + (e.heure && e.heure[L] ? ", " + e.heure[L] : "");
-      var lien = /^https?:\/\//.test(e.lien || "") ? e.lien : lienWhatsApp(T("Bonjour Discovermores, je souhaite participer à : ", "Hello Discovermores, I would like to take part in: ") + e.titre[L] + " (" + quand + ").");
+      var lien = lienEvt(e, quand);
+      var infos = infosEvt(e);
       var d = new Date(e.debut + "T12:00:00");
       var visuel = /^(https?:\/\/|\/uploads\/)/.test(e.image || "") ? "<img src='" + echapper(e.image) + "' alt='" + echapper(e.titre[L]) + "' loading='lazy'>"
         : "<div class='evt-date' aria-hidden='true'><b>" + d.getDate() + "</b><span>" + MOIS_C[d.getMonth()] + "</span></div>";
@@ -1116,6 +1139,7 @@
         "<div class='evt-visuel'>" + visuel + "</div><div class='evt-corps'><div class='evt-badges'>" +
         (e.type === "partenaire" ? "<span class='evt-badge partenaire'>" + T("Partenaire", "Partner") + "</span>" : "") + "</div>" +
         "<h3>" + echapper(e.titre[L]) + "</h3><p class='evt-quand'><b>" + echapper(e.lieu[L]) + "</b> · <time datetime='" + echapper(e.debut) + "'>" + echapper(quand) + "</time></p>" +
+        (infos ? "<p class='evt-infos'>" + infos + "</p>" : "") +
         "<p>" + echapper(e.description[L]) + "</p>" + (e.organisateur ? "<p class='evt-orga'>" + T("Organisé par ", "Organised by ") + echapper(e.organisateur) + "</p>" : "") +
         "<a class='bouton" + (grande ? "" : " secondaire") + "' href='" + echapper(lien) + "' rel='noopener' data-mesure='event_click'>" + T("Je veux venir", "I want to come") + "</a></div></article>";
     };
@@ -1136,6 +1160,10 @@
     window.addEventListener("resize", ajusterImageUne);
     var montrerFlottante = function () {
       if (!flottante) return;
+      // Sur téléphone, la fenêtre cachait le titre et le bouton principal : on ne l’ouvre plus
+      if (window.matchMedia("(max-width: 767px)").matches) { flottante.hidden = true; return; }
+      // Uniquement une vraie activité « à la une » du back office (jamais le contenu de départ de la page)
+      if (!flottante.hasAttribute("data-evt-reel")) return;
       var id = flottante.getAttribute("data-evt-id");
       if (flottante.getAttribute("data-evt-fin") < jourIso || dejaFermee(id)) { flottante.hidden = true; return; }
       flottante.hidden = false;
@@ -1153,13 +1181,14 @@
       if (!flottante || !e) return;
       var L = EN ? "en" : "fr";
       var quand = dateTexte(e.debut) + (e.fin && e.fin !== e.debut ? T(" au ", " to ") + dateTexte(e.fin) : "") + (e.heure && e.heure[L] ? ", " + e.heure[L] : "");
+      flottante.setAttribute("data-evt-reel", "");
       flottante.setAttribute("data-evt-id", e.id || "");
       flottante.setAttribute("data-evt-fin", e.fin || e.debut);
       flottante.querySelector("[data-une-titre]").textContent = e.titre[L];
-      flottante.querySelector("[data-une-quand]").innerHTML = "<b>" + echapper(e.lieu[L]) + "</b> · " + echapper(quand);
+      var infos = infosEvt(e);
+      flottante.querySelector("[data-une-quand]").innerHTML = "<b>" + echapper(e.lieu[L]) + "</b> · " + echapper(quand) + (infos ? "<br>" + infos : "");
       flottante.querySelector("[data-une-desc]").textContent = e.description[L];
-      flottante.querySelector("[data-une-lien]").href = /^https?:\/\//.test(e.lien || "") ? e.lien
-        : lienWhatsApp(T("Bonjour Discovermores, je souhaite participer à : ", "Hello Discovermores, I would like to take part in: ") + e.titre[L] + " (" + quand + ").");
+      flottante.querySelector("[data-une-lien]").href = lienEvt(e, quand);
       // Colonne image à gauche : seulement si l’activité a une image
       var ancienne = flottante.querySelector(".une-image");
       if (ancienne) ancienne.remove();
@@ -1169,7 +1198,7 @@
         var image = document.createElement("img");
         image.className = "une-image";
         image.src = e.image;
-        image.alt = "";
+        image.alt = e.titre[L];
         image.addEventListener("load", ajusterImageUne);
         flottante.insertBefore(image, flottante.firstChild);
       }
@@ -1212,11 +1241,7 @@
         .catch(function () {});
     }
   }
-  // Clic sur « Je veux venir » (Plausible, si la mesure d’audience est active)
-  document.addEventListener("click", function (ev) {
-    var a = ev.target.closest && ev.target.closest("[data-mesure=event_click]");
-    if (a && window.plausible) window.plausible("event_click", { props: { page: window.location.pathname } });
-  });
+  // « Je veux venir » ouvre WhatsApp : compté dans clic_whatsapp (mesure d’audience, en fin de fichier)
 
   /* ---------- Contact : sujet choisi depuis un lien (?sujet=Data Pro) ---------- */
   var champSujet = document.querySelector('select[name="sujet"]');
@@ -1288,7 +1313,7 @@
         "<a class='bouton secondaire' href='" + f.fiche + "'>" + T("Voir le détail", "See the details") + "</a></div>";
       zone.hidden = false;
       zone.setAttribute("tabindex", "-1"); zone.focus();
-      mesurer("quiz_formule", { formule: code });
+      mesurer("quiz_resultat", { formule: code });
     });
   });
 
@@ -1337,39 +1362,41 @@
     });
   });
 
-  /* ---------- Mesure du parcours (sans cookie) ----------
-     Actif seulement si Plausible est chargé (SITE["analytics"] dans src/data.py).
-     Événements : clic_reserver, clic_whatsapp, clic_telephone, clic_email, voir_paiement,
-     commande_boutique, achat_gpx, envoi_formulaire. La propriété "source" indique la page. */
+  /* ---------- Mesure d’audience (sans cookie) : 6 événements, aucune donnée personnelle ----------
+     Actif seulement quand l’outil (Plausible ou Umami) est chargé dans le <head> : voir le commentaire
+     « Mesure d’audience » en haut de chaque page. Propriétés : formule et page / emplacement uniquement. */
   function mesurer(nom, props) {
-    if (typeof window.plausible === "function") {
-      props = props || {};
-      props.source = location.pathname.replace(/^\//, "") || "index.html";
-      window.plausible(nom, { props: props });
-    }
+    props = props || {};
+    props.page = location.pathname;
+    if (typeof window.plausible === "function") window.plausible(nom, { props: props });
+    else if (window.umami && typeof window.umami.track === "function") window.umami.track(nom, props);
   }
+  // Adresses avec ou sans « .html », relatives ou absolues (/en/…)
+  var cheminLien = function (h) { try { return new URL(h, location.href).pathname.replace(/\.html$/, ""); } catch (e) { return ""; } };
+  var formuleLien = function (h) { var m = /[?&]formule=([\w-]+)/.exec(h); return m ? m[1] : "aucune"; };
   document.addEventListener("click", function (ev) {
     var a = ev.target.closest && ev.target.closest("a[href]");
     if (!a) return;
     var h = a.getAttribute("href");
-    var zone = a.closest(".barre-mobile") ? "barre-mobile" : a.closest(".heros") ? "en-tete" : a.closest(".carte") ? "carte" : a.closest(".nav") ? "menu" : "page";
-    if (/^(reservation|book)\.html/.test(h)) mesurer("clic_reserver", { zone: zone, formule: (h.split("formule=")[1] || "") });
-    else if (/wa\.me/.test(h)) {
-      var txt = decodeURIComponent(h.split("text=")[1] || "");
-      if (/Tracé GPS|GPS track/i.test(txt)) mesurer("achat_gpx", { zone: zone });
-      else if (a.closest(".produit")) mesurer("commande_boutique", { article: (a.closest(".produit").id || "") });
-      mesurer("clic_whatsapp", { zone: zone });
-    }
-    else if (/^tel:/.test(h)) mesurer("clic_telephone", { zone: zone });
-    else if (/^mailto:/.test(h)) mesurer("clic_email", { zone: zone });
-    else if (/^(paiement|payment)\.html/.test(h)) mesurer("voir_paiement", { zone: zone });
+    var zone = a.closest(".barre-mobile") ? "barre-mobile" : a.closest(".heros") ? "en-tete" : a.closest(".carte") ? "carte" : a.closest(".nav") ? "menu" : a.closest(".une-flottante") ? "a-la-une" : "page";
+    if (/^https:\/\/(wa\.me|api\.whatsapp\.com)\//.test(h)) { mesurer("clic_whatsapp", { emplacement: zone }); return; }
+    var chemin = cheminLien(h);
+    if (/\/(reservation|book)$/.test(chemin)) { mesurer("clic_reserver", { emplacement: zone, formule: formuleLien(h) }); return; }
+    if (/\/(formules|tours|zero-effort|soft-trek|bivouac|karthala-sportif)$/.test(chemin)) mesurer("clic_experience", { emplacement: zone, cible: chemin + (a.hash || "") });
   });
-  document.querySelectorAll("form[data-form]").forEach(function (form) {
-    form.addEventListener("submit", function () {
-      if (form.checkValidity()) mesurer("envoi_formulaire", { formulaire: form.getAttribute("data-form"), formule: form.elements.formule ? form.elements.formule.value : "" });
-    });
-  });
-
+  // Formulaire de réservation commencé : une fois par visite de la page
+  var formMesure = document.querySelector("form[data-form=reservation]");
+  if (formMesure) formMesure.addEventListener("input", function () {
+    mesurer("formulaire_debut", { formule: formMesure.elements.formule.value || "aucune" });
+  }, { once: true });
+  // Demande envoyée : la page de confirmation n’est atteinte qu’après l’envoi (comptée une fois par demande)
+  if (/\/confirmation(\.html)?$/.test(location.pathname)) {
+    var pMesure = new URLSearchParams(location.search);
+    var cleMesure = "k360-mesure-" + (pMesure.get("id") || pMesure.get("date") || "");
+    var dejaCompte = false;
+    try { dejaCompte = !!sessionStorage.getItem(cleMesure); sessionStorage.setItem(cleMesure, "1"); } catch (e) {}
+    if (!dejaCompte) mesurer("demande_envoyee", { formule: pMesure.get("formule") || "", personnes: pMesure.get("n") || "" });
+  }
   var annee = document.querySelector("[data-annee]");
   if (annee) annee.textContent = new Date().getFullYear();
 })();

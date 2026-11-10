@@ -26,15 +26,16 @@
   }
 
   // ---------- Contenus gérés : [champ, libellé, type] ----------
-  const FORMULES_NOMS = ['Zéro Effort', 'Soft Trek', 'Bivouac au volcan', 'Karthala Sportif', 'Quad & Buggy'];
+  const FORMULES_NOMS = ['Zéro Effort', 'Soft Trek', 'Bivouac au volcan', 'Karthala Sportif'];
   const CRUD = {
     evenements: { title: 'Agenda / activités', cols: ['debut', 'titre_fr', 'a_la_une', 'publie'], fields: [
       ['titre_fr', 'Titre FR'], ['titre_en', 'Titre EN'], ['debut', 'Début', 'date'], ['fin', 'Fin', 'date'], ['heure_fr', 'Heure FR (ex. 7 h 00)'], ['heure_en', 'Heure EN (ex. 7:00 am)'],
       ['lieu_fr', 'Lieu FR'], ['lieu_en', 'Lieu EN'], ['description_fr', 'Description FR', 'textarea'], ['description_en', 'Description EN', 'textarea'],
       ['type', 'Type', ['discovermores', 'partenaire']], ['organisateur', 'Organisateur'], ['lien', 'Lien d\'inscription (sinon WhatsApp)'], ['image', 'Image (facultatif)', 'image'],
+      ['prix', 'Prix par personne (ex. 45 €) — vide = non affiché'], ['niveau_fr', 'Niveau FR (ex. Difficile)'], ['niveau_en', 'Niveau EN (ex. Hard)'], ['places', 'Nombre de places'],
       ['a_la_une', 'À la une (carte flottante de l\'accueil)', 'bool'], ['publie', 'Publié', 'bool']] },
     avis: { title: 'Avis clients', cols: ['auteur', 'formule', 'note', 'texte', 'publie'], fields: [
-      ['auteur', 'Auteur'], ['pays', 'Pays'], ['formule', 'Formule', ['zero-effort', 'soft-trek', 'bivouac', 'sportif', 'quad-buggy']], ['note', 'Note (1–5)', 'number'],
+      ['auteur', 'Auteur'], ['pays', 'Pays'], ['formule', 'Formule', ['zero-effort', 'soft-trek', 'bivouac', 'sportif']], ['note', 'Note (1–5)', 'number'],
       ['texte', 'Texte', 'textarea'], ['mois', 'Mois (AAAA-MM)'], ['publie', 'Publié sur le site', 'bool']] },
     savoirs: { title: 'K269 — réponses de l\'équipe', cols: ['langue', 'titre', 'publie'], fields: [
       ['langue', 'Langue', ['fr', 'en']], ['titre', 'Question / titre'], ['texte', 'Réponse (mettez aussi les mots que les visiteurs utilisent)', 'textarea'],
@@ -494,7 +495,7 @@
       avis: 'Les retours d\'expérience avec accord de publication arrivent ici, non publiés : relisez puis cochez « Publié ».',
       produits: 'Les produits ajoutés apparaissent sur la page Boutique (français et anglais) avec photo, tailles et bouton de commande WhatsApp. Pour les 7 produits d\'origine (★), seuls le prix, le stock et la disponibilité se modifient.',
       commandes: 'Les commandes passées avec le panier du site arrivent ici avec leur référence (B…). Celles reçues sur WhatsApp peuvent être ajoutées à la main. Une commande annulée remet ses articles en stock.',
-      partenaires: 'Rubrique « Avec le soutien de » : logos du pied de page, sur toutes les pages. Les deux autres rubriques remplacent les emplacements vides de la page Partenaires et de la section « Ils nous font confiance » de l'accueil. Logo conseillé : PNG ou SVG sur fond transparent ou blanc.',
+      partenaires: 'Rubrique « Avec le soutien de » : logos du pied de page, sur toutes les pages. Les deux autres rubriques remplacent les emplacements vides de la page Partenaires et de la section « Ils nous font confiance » de l’accueil. Logo conseillé : PNG ou SVG sur fond transparent ou blanc.',
       photos: 'Les photos publiées apparaissent en tête de la galerie, dans une rubrique « Dernières photos ».',
     }[name];
     const titre = (c) => (c === 'created_at' ? 'Date' : c === 'confirmation_info' ? 'E-mail au client' : c === 'nom' && name === 'produits' ? 'Nom' : def.fields.find((f) => f[0] === c)?.[1] || c);
@@ -634,9 +635,12 @@
       ${bloc('Textes à compléter du site', '', [
         ['tarif_agenda_evenement', 'Agenda : tarif d\'une annonce'], ['tarif_agenda_semaine', 'Agenda : tarif par semaine'],
         ['tarif_datapro_rapport', 'Data Pro : tarif du rapport'], ['tarif_datapro_abonnement', 'Data Pro : tarif annuel'], ['assurance_contrat', 'CGV : numéro de contrat Amana Assurances']])}
-      ${bloc('Alerte volcanique', 'Le niveau s\'affiche dans « Aujourd\'hui au Karthala » sur l\'accueil. Au-delà du vert, un bandeau apparaît aussi en haut de toutes les pages. Le message remplace la note sous le niveau.', [
-        ['alerte_niveau', 'Niveau', [['', 'À confirmer (affiché tel quel sur l\'accueil)'], ['vert', 'Vert (aucun bandeau)'], ['jaune', 'Jaune · vigilance'], ['orange', 'Orange · ascensions suspendues'], ['rouge', 'Rouge · ascensions interdites']]],
+      ${bloc('Alerte volcanique', 'Le niveau ne s\'affiche dans « Aujourd\'hui au Karthala » que s\'il est officiel : la date et le lien vers la source sont obligatoires, sinon rien n\'apparaît. Au-delà du vert, un bandeau apparaît aussi en haut de toutes les pages. Le message remplace la note sous le niveau.', [
+        ['alerte_niveau', 'Niveau', [['', 'Non communiqué (rien d\'affiché)'], ['vert', 'Vert (aucun bandeau)'], ['jaune', 'Jaune · vigilance'], ['orange', 'Orange · ascensions suspendues'], ['rouge', 'Rouge · ascensions interdites']]],
+        ['alerte_date', 'Date de publication du niveau officiel (ex. 2026-11-10)'], ['alerte_source', 'Lien vers la source officielle (https://…)'],
         ['alerte_message', 'Message personnalisé (facultatif)']])}
+      ${bloc('Mesure d’audience (sans cookie)', 'Créez d’abord le site dans Plausible ou Umami. Une fois réglé, le script est ajouté à toutes les pages et la page Confidentialité le mentionne. Événements suivis : clic_experience, clic_reserver, quiz_resultat, formulaire_debut, demande_envoyee, clic_whatsapp.', [
+        ['mesure_outil', 'Outil', [['', 'Aucun'], ['plausible', 'Plausible'], ['umami', 'Umami']]], ['mesure_id', 'Plausible : domaine (ex. karthala360.fr) · Umami : identifiant du site']])}
       ${bloc('Notifications', s.smtp_actif ? 'Envoi d\'e-mails actif.' : '⏸ Envoi d\'e-mails inactif : renseignez SMTP_HOST, SMTP_USER, SMTP_PASS dans le fichier .env du serveur puis redémarrez.', [
         ['notif_email', 'E-mail qui reçoit les nouvelles réservations et messages'],
         ['envoi_auto_bon', 'Envoi automatique du bon de réservation au client', [['1', "Oui : dès qu'une réservation est enregistrée (si le client a donné son e-mail)"], ['0', 'Non : envoi à la main avec le bouton 📧']]]])}

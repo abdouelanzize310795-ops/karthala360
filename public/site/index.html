@@ -68,8 +68,8 @@
     <h1>Partez à la découverte du <em>Karthala</em>, entre aventure, nature et expertise locale.</h1>
     <p>Marchez dans la forêt humide, dépassez les nuages et arrivez au bord d’une caldeira de plusieurs kilomètres, sur le plus haut volcan des Comores. En 4×4, à pied ou avec une nuit sous les étoiles : il y a une formule pour chaque niveau.</p>
     <div class="boutons">
-      <a class="bouton" href="formules.html">Choisir ma formule</a>
-      <a class="bouton secondaire" href="reservation.html">Réserver une date</a>
+      <a class="bouton" href="formules.html">Voir les 4 expériences et les prix</a>
+      <a class="bouton secondaire heros-resa" href="reservation.html">Réserver une date</a>
     </div>
     <div class="heros-badges">
       <div class="verre"><small>À partir de, à 4</small><b>63 € / pers.</b></div>
@@ -80,7 +80,7 @@
   </div>
 </section>
 
-<section class="aujourdhui" aria-label="Aujourd’hui au Karthala" data-stats-zone>
+<section class="aujourdhui" aria-label="Aujourd’hui au Karthala" data-stats-zone data-masquer-si-vide hidden>
   <div class="conteneur">
     <p class="aujourdhui-titre">Aujourd’hui au Karthala</p>
     <div class="aujourdhui-grille">
@@ -147,6 +147,7 @@
   <a class="carte-photo" href="formules.html#sportif" tabindex="-1" aria-hidden="true"><img src="assets/karthala-experience/25-descent-vegetation-group.webp" srcset="assets/karthala-experience/25-descent-vegetation-group-800.webp 800w, assets/karthala-experience/25-descent-vegetation-group.webp 1152w" sizes="(min-width: 1100px) 33vw, (min-width: 700px) 50vw, 100vw" alt="" width="1152" height="1536" loading="lazy" decoding="async"><span class="pastille">1 jour</span></a>
   <div class="carte-corps">
     <h3><a href="formules.html#sportif">Karthala Sportif</a></h3>
+    <span class="etiquette-entraines">Pour randonneurs entraînés</span>
     <span class="effort"><i aria-hidden="true"><s class="plein"></s><s class="plein"></s><s class="plein"></s><s class="plein"></s></i>Effort : Difficile</span>
     <p class="promesse">Le Karthala en entier, de la forêt humide au bord du cratère.</p>
     <svg class="mini-profil" viewBox="0 0 320 84" role="img" aria-label="Tout à pied, de Mvouni à la caldeira"><path class="mp-sol" d="M4.0,68 L4.0,64.1 L7.4,61.8 L11.0,60.4 L14.4,59.7 L18.0,59.1 L21.4,58.8 L24.8,58.7 L28.4,58.1 L31.8,57.6 L35.1,57.1 L38.8,56.6 L42.2,56.5 L45.8,55.8 L49.5,55.6 L52.8,54.8 L56.2,54.4 L59.8,53.6 L63.2,52.7 L66.8,52.4 L70.2,51.6 L73.9,51.0 L77.8,50.1 L81.7,49.7 L85.1,49.1 L88.5,48.5 L92.1,48.0 L95.5,47.6 L98.8,47.2 L102.5,46.8 L105.8,46.5 L109.2,45.3 L112.9,44.7 L116.5,43.9 L119.9,43.2 L123.2,42.2 L126.6,41.7 L130.3,40.8 L133.9,39.9 L137.3,39.2 L140.9,38.6 L144.6,38.4 L148.2,38.0 L151.6,37.5 L155.2,37.1 L158.6,36.7 L162.0,36.3 L165.6,35.8 L169.0,35.2 L172.3,34.9 L175.7,34.6 L179.1,34.4 L182.7,34.2 L186.1,33.6 L189.5,33.4 L192.8,33.2 L196.2,32.6 L199.8,32.3 L203.2,32.1 L206.6,31.6 L209.9,31.0 L213.6,30.7 L217.0,30.1 L220.3,29.6 L223.7,29.1 L227.1,28.7 L230.7,28.2 L234.1,27.7 L237.4,27.4 L240.8,26.9 L244.2,26.3 L247.5,25.9 L251.2,25.3 L254.6,24.7 L257.9,24.2 L261.3,23.5 L264.7,22.7 L268.3,21.9 L271.7,21.4 L275.0,20.8 L278.4,19.9 L281.8,19.3 L285.1,18.6 L288.8,18.2 L292.2,17.6 L295.5,17.3 L298.9,16.8 L302.3,16.3 L305.9,15.7 L309.3,15.3 L312.6,14.9 L316.0,14.4 L316.0,14.4 L316.0,68 Z"/><path class="mp-pied" d="M4.0,64.1 L7.4,61.8 L11.0,60.4 L14.4,59.7 L18.0,59.1 L21.4,58.8 L24.8,58.7 L28.4,58.1 L31.8,57.6 L35.1,57.1 L38.8,56.6 L42.2,56.5 L45.8,55.8 L49.5,55.6 L52.8,54.8 L56.2,54.4 L59.8,53.6 L63.2,52.7 L66.8,52.4 L70.2,51.6 L73.9,51.0 L77.8,50.1 L81.7,49.7 L85.1,49.1 L88.5,48.5 L92.1,48.0 L95.5,47.6 L98.8,47.2 L102.5,46.8 L105.8,46.5 L109.2,45.3 L112.9,44.7 L116.5,43.9 L119.9,43.2 L123.2,42.2 L126.6,41.7 L130.3,40.8 L133.9,39.9 L137.3,39.2 L140.9,38.6 L144.6,38.4 L148.2,38.0 L151.6,37.5 L155.2,37.1 L158.6,36.7 L162.0,36.3 L165.6,35.8 L169.0,35.2 L172.3,34.9 L175.7,34.6 L179.1,34.4 L182.7,34.2 L186.1,33.6 L189.5,33.4 L192.8,33.2 L196.2,32.6 L199.8,32.3 L203.2,32.1 L206.6,31.6 L209.9,31.0 L213.6,30.7 L217.0,30.1 L220.3,29.6 L223.7,29.1 L227.1,28.7 L230.7,28.2 L234.1,27.7 L237.4,27.4 L240.8,26.9 L244.2,26.3 L247.5,25.9 L251.2,25.3 L254.6,24.7 L257.9,24.2 L261.3,23.5 L264.7,22.7 L268.3,21.9 L271.7,21.4 L275.0,20.8 L278.4,19.9 L281.8,19.3 L285.1,18.6 L288.8,18.2 L292.2,17.6 L295.5,17.3 L298.9,16.8 L302.3,16.3 L305.9,15.7 L309.3,15.3 L312.6,14.9 L316.0,14.4 L316.0,14.4"/><circle class="mp-pt" cx="316.0" cy="14.4" r="3.5"/><text x="4" y="81">MVOUNI</text><text x="316" y="7" text-anchor="end">CALDEIRA</text></svg>
@@ -159,22 +160,6 @@
   </div>
 </section>
 
-<section class="section fond-blanc nouveaute" id="quad-buggy">
-  <div class="conteneur duo">
-    <div>
-      <p class="surtitre"><span class="pastille-nouveau">Nouveau</span> Quad & Buggy</p>
-      <h2>Le Karthala en quad ou en buggy</h2>
-      <p class="intro">Une autre façon de monter au Karthala : en quad ou en buggy, sur les pistes du volcan, avec l’équipe Discovermores.</p>
-      <p class="prix-des">À partir de <b>150 €</b> par personne</p>
-      <p class="petit">Parcours, durée et conditions (âge, permis, équipement) : l’équipe vous les précise avec la date.</p>
-      <div class="boutons">
-        <a class="bouton" href="reservation.html?formule=quad-buggy">Demander une date</a>
-        <a class="bouton secondaire" href="https://wa.me/2693565803?text=Bonjour%20Discovermores%2C%20je%20suis%20int%C3%A9ress%C3%A9%28e%29%20par%20l%E2%80%99ascension%20du%20Karthala%20en%20quad%20ou%20en%20buggy." rel="noopener">Poser une question</a>
-      </div>
-    </div>
-    <img src="assets/quad/quad-deux-quads-piste.webp" srcset="assets/quad/quad-deux-quads-piste-800.webp 640w, assets/quad/quad-deux-quads-piste.webp 960w" sizes="(min-width: 820px) 45vw, 92vw" alt="Deux quads à l’arrêt sur une piste de gravier volcanique, devant les pentes du massif" width="960" height="540" loading="lazy" decoding="async">
-  </div>
-</section>
 
 
 <section class="section fond-sombre" id="avis" data-avis-zone="accueil" data-max="3">
@@ -189,10 +174,6 @@
   <div class="etoiles"><span class="avis-reco">Recommande Discovermores</span></div>
   <blockquote lang="fr">Un accueil ultra chaleureux et une équipe hyper efficace, le combo parfait pour passer un super séjour à Ngazidja ! La bonne humeur et les paysages sublimes garantis ou remboursés, en mode aventure.</blockquote>
   <figcaption><b>Amelie P.</b> · Séjour à Ngazidja · juin 2022 · Facebook</figcaption>
-</figure><figure class="avis" data-avis-formule="soft-trek">
-  <div class="etoiles" role="img" aria-label="5 sur 5"><span class="evt-badge exemple">Exemple</span> ★★★★★</div>
-  <blockquote lang="fr">Départ à l’aube, guide patient et attentif au rythme de chacun. Nous sommes arrivés au bord de la caldeira au moment où les nuages se sont ouverts.</blockquote>
-  <figcaption><b>Prénom</b>, Pays · Soft Trek · mois année</figcaption>
 </figure></div>
     <div class="boutons"><a class="lien-discret" href="retour-experience.html">Donner mon avis</a></div>
   </div>
@@ -207,32 +188,22 @@
 </section>
 
 
-<section class="section fond-blanc" id="a-la-une" data-evenements="une" data-lang="fr">
+<section class="section fond-blanc" id="a-la-une" data-evenements="une" data-lang="fr" hidden>
   <div class="conteneur">
     <p class="surtitre">Activités à la une</p>
     <h2>À ne pas <em>manquer</em></h2>
-    <div class="evts" data-evts><article class="evt evt-grande" data-evt-fin="2026-11-14" id="EVT-2026-001">
-  <div class="evt-visuel"><div class="evt-date" aria-hidden="true"><b>14</b><span>nov.</span></div></div>
-  <div class="evt-corps">
-    <div class="evt-badges"><span class="evt-badge exemple">Exemple</span></div>
-    <h3>Journée Karthala Zéro Déchets</h3>
-    <p class="evt-quand"><b>Sentier de Mvouni</b> · <time datetime="2026-11-14">samedi 14 novembre 2026, 7 h 00</time></p>
-    <p>Une matinée de ramassage des déchets sur le sentier du Karthala avec les guides de Discovermores. Gants et sacs fournis, collation offerte. Ouvert à tous dès 12 ans.</p>
-    <p class="evt-orga">Organisé par Discovermores</p>
-    <a class="bouton" href="https://wa.me/2693565803?text=Bonjour%20Discovermores%2C%20je%20souhaite%20participer%20%C3%A0%20%3A%20Journ%C3%A9e%20Karthala%20Z%C3%A9ro%20D%C3%A9chets%20%28samedi%2014%20novembre%202026%2C%207%20h%2000%29." rel="noopener" data-mesure="event_click">Je veux venir</a>
-  </div>
-</article></div>
+    <div class="evts" data-evts></div>
     <div class="boutons"><a class="bouton secondaire" href="agenda.html">Tout l’agenda</a>
       <a class="lien-discret" href="agenda.html#annoncer">Annoncer votre événement</a></div>
   </div>
 </section>
-<aside class="une-flottante" data-une-flottante data-evt-id="EVT-2026-001" data-evt-fin="2026-11-14" aria-label="Activités à la une" hidden>
+<aside class="une-flottante" data-une-flottante data-evt-id="" data-evt-fin="" aria-label="Activités à la une" hidden>
   <button type="button" class="une-fermer" data-une-fermer aria-label="Fermer">×</button>
-  <p class="une-surtitre">Activités à la une <span class="evt-badge exemple">Exemple</span></p>
-  <p class="une-titre" data-une-titre>Journée Karthala Zéro Déchets</p>
-  <p class="une-quand" data-une-quand><b>Sentier de Mvouni</b> · samedi 14 novembre 2026, 7 h 00</p>
-  <p class="une-desc" data-une-desc>Une matinée de ramassage des déchets sur le sentier du Karthala avec les guides de Discovermores. Gants et sacs fournis, collation offerte. Ouvert à tous dès 12 ans.</p>
-  <div class="une-actions"><a class="bouton" href="https://wa.me/2693565803?text=Bonjour%20Discovermores%2C%20je%20souhaite%20participer%20%C3%A0%20%3A%20Journ%C3%A9e%20Karthala%20Z%C3%A9ro%20D%C3%A9chets%20%28samedi%2014%20novembre%202026%2C%207%20h%2000%29." rel="noopener" data-une-lien data-mesure="event_click">Je veux venir</a>
+  <p class="une-surtitre">Activités à la une</p>
+  <p class="une-titre" data-une-titre></p>
+  <p class="une-quand" data-une-quand></p>
+  <p class="une-desc" data-une-desc></p>
+  <div class="une-actions"><a class="bouton" href="#" rel="noopener" data-une-lien data-mesure="event_click">Je veux venir</a>
     <a href="agenda.html">Voir l’agenda</a></div>
 </aside>
 
@@ -295,7 +266,7 @@
 </section>
 
 
-<section class="section fond-sombre" id="compteur" data-stats-zone>
+<section class="section fond-sombre" id="compteur" data-stats-zone data-masquer-si-vide hidden>
   <div class="conteneur">
     <p class="surtitre">Compteur public</p>
     <h2>Combien de personnes montent <em>au Karthala</em> ?</h2>

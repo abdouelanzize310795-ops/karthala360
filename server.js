@@ -21,7 +21,7 @@ const RESOURCES = {
   questions: [],
   savoirs: ['langue', 'titre', 'texte', 'lien', 'publie'],
   avis: ['auteur', 'pays', 'formule', 'note', 'texte', 'mois', 'publie'],
-  evenements: ['titre_fr', 'titre_en', 'lieu_fr', 'lieu_en', 'description_fr', 'description_en', 'heure_fr', 'heure_en', 'debut', 'fin', 'type', 'organisateur', 'lien', 'image', 'a_la_une', 'publie'],
+  evenements: ['titre_fr', 'titre_en', 'lieu_fr', 'lieu_en', 'description_fr', 'description_en', 'heure_fr', 'heure_en', 'debut', 'fin', 'type', 'organisateur', 'lien', 'image', 'prix', 'niveau_fr', 'niveau_en', 'places', 'a_la_une', 'publie'],
   sorties: ['code', 'formule', 'date', 'guide', 'statut', 'decision', 'meteo', 'terrain', 'heure_depart', 'heure_retour', 'dechets_kg', 'observations'],
   formules: ['code', 'sigle', 'nom', 'nom_en', 'description', 'description_en', 'prix', 'type', 'supp', 'contrib', 'age_min', 'min_pers', 'actif', 'ordre'],
   produits: ['code', 'nom', 'nom_en', 'description', 'description_en', 'image', 'tailles', 'badge', 'badge_en', 'prix', 'disponible', 'stock', 'ordre'],
@@ -36,7 +36,7 @@ const RES_STATUS = ['nouvelle', 'confirmée', 'acompte payé', 'payée', 'termin
 const STATUTS_PAYES = "('acompte payé','payée','terminée')";
 const SETTINGS_AUTORISES = new Set(['whatsapp', 'email', 'delai_reponse', 'paiement_virement', 'paiement_paypal', 'paiement_mvola', 'paiement_wakati',
   'acompte_pct', 'seuil_action', 'fonds_ajustement', 'tarif_agenda_evenement', 'tarif_agenda_semaine', 'tarif_datapro_rapport', 'tarif_datapro_abonnement',
-  'assurance_contrat', 'alerte_niveau', 'alerte_message', 'notif_email', 'site_url', 'lien_instagram', 'lien_facebook', 'envoi_auto_bon', 'style_site']);
+  'assurance_contrat', 'alerte_niveau', 'alerte_message', 'alerte_date', 'alerte_source', 'mesure_outil', 'mesure_id', 'notif_email', 'site_url', 'lien_instagram', 'lien_facebook', 'envoi_auto_bon', 'style_site']);
 // Pages dont le texte contient des prix calculés à partir des tarifs (à relire après un changement de tarif)
 const PAGES_PRIX = ['index.html', 'formules.html', 'reservation.html', 'cgv.html', 'impact.html', 'en/index.html', 'en/tours.html', 'en/book.html', 'en/terms.html', 'en/preserve.html', 'assets/data/connaissance-fr.json', 'assets/data/connaissance-en.json'];
 
@@ -386,6 +386,7 @@ init().then((db) => {
       const rows = db.all("SELECT * FROM evenements WHERE publie=1 AND COALESCE(fin,debut)>=date('now') ORDER BY debut");
       return res.json({ ok: true, evenements: rows.map((e) => ({
         id: String(e.id), debut: e.debut, fin: e.fin || e.debut, type: e.type, organisateur: e.organisateur, lien: e.lien, image: e.image, a_la_une: !!e.a_la_une,
+        prix: e.prix || '', places: e.places || '', niveau: { fr: e.niveau_fr || '', en: e.niveau_en || e.niveau_fr || '' },
         titre: { fr: e.titre_fr, en: e.titre_en || e.titre_fr }, lieu: { fr: e.lieu_fr || '', en: e.lieu_en || e.lieu_fr || '' },
         description: { fr: e.description_fr || '', en: e.description_en || e.description_fr || '' }, heure: { fr: e.heure_fr || '', en: e.heure_en || e.heure_fr || '' },
       })) });

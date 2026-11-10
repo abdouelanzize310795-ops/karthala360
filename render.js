@@ -123,9 +123,34 @@ function creer(SITE, db) {
     for (const [fichier, texte, cle] of A_COMPLETER) {
       if (fichier !== rel || !s[cle]) continue;
       const marque = `<span class="todo">[À COMPLÉTER : ${texte}]</span>`;
-      html = html.split(marque).join(`<span>${esc(s[cle]).replace(/\n/g, '<br>')}</span>`);
+      // Lien PayPal.me : rendu cliquable
+      const valeur = String(s[cle]).trim();
+      const paypal = cle === 'paiement_paypal' && /^(https?:\/\/)?(www\.)?paypal\.me\/[\w.-]+\/?$/i.test(valeur);
+      const contenu = paypal
+        ? `<a href="${esc(/^https?:/i.test(valeur) ? valeur : 'https://' + valeur)}" rel="noopener" target="_blank">${esc(valeur)}</a>`
+        : esc(valeur).replace(/\n/g, '<br>');
+      html = html.split(marque).join(`<span>${contenu}</span>`);
     }
-    return html;
+    return masquerNonRenseigne(html);
+  }
+
+  // Rien de « À COMPLÉTER » en ligne : ce qui n'est pas renseigné dans Paramètres est masqué.
+  const TODO = String.raw`<span class="todo">\[À COMPLÉTER : [^\]]*\]</span>`;
+  function masquerNonRenseigne(html) {
+    if (!html.includes('class="todo"')) return html;
+    // Paiement : la carte du moyen est masquée
+    html = html.replace(new RegExp(String.raw`<div class="moyen"( id="[\w-]+")>((?:(?!<div class="moyen")[\s\S])*?)` + TODO, 'g'), '<div class="moyen"$1 hidden>$2');
+    if (/<div class="moyen"[^>]*hidden/.test(html)) {
+      html = html.replace('Quatre façons <em>de payer</em>', 'Comment <em>payer</em>').replace('Four ways <em>to pay</em>', 'How <em>to pay</em>');
+      // Aucun moyen renseigné : toute la section est masquée
+      if (!/<div class="moyen"(?![^>]*hidden)/.test(html)) html = html.replace(/<section([^>]*)>((?:(?!<section)[\s\S])*?<div class="moyens">)/, '<section$1 hidden>$2');
+    }
+    // Tarifs non fixés : la ligne de prix disparaît
+    html = html.replace(new RegExp(`<p class="prix-data">${TODO}</p>`, 'g'), '');
+    // CGV : numéro de contrat d'assurance pas encore fourni
+    html = html.replace(new RegExp(String.raw`, (contrat n°|policy no\.) ` + TODO, 'g'), '');
+    // Filet de sécurité : tout autre champ restant disparaît
+    return html.replace(new RegExp(TODO, 'g'), '');
   }
 
   // Bouton « Ajouter au panier » : le panier (assets/js/panier.js) lit le code, le nom affiché et le prix ;
@@ -204,26 +229,33 @@ function creer(SITE, db) {
 
   function partenaires(html, en) {
     const liste = db.all("SELECT * FROM partenaires WHERE publie=1 ORDER BY ordre, id");
-    if (!liste.length) return html;
     const carte = (p) => {
       const logo = p.logo ? `<img src="${esc(p.logo)}" alt="${esc(p.nom)}" loading="lazy" decoding="async">` : `<span>${esc(p.nom)}</span>`;
       const boite = p.lien ? `<a class="logo-case grand" href="${esc(p.lien)}" rel="noopener" target="_blank">${logo}</a>` : `<span class="logo-case grand">${logo}</span>`;
       const desc = (en && p.description_en) || p.description || '';
       return `<article class="partenaire">${boite}<div><h3>${esc(p.nom)}</h3>${desc ? `<p class="petit">${esc(desc)}</p>` : ''}</div></article>`;
     };
-    // Grille 1 : financeurs ; grille 2 : « Ils nous font confiance ». Les emplacements vides restants sont conservés.
+    // Grille 1 : financeurs ; grille 2 : « Ils nous font confiance ». Jamais d'emplacement vide en ligne :
+    // une rubrique sans partenaire publié est masquée en entier.
     const grilles = [...html.matchAll(/<div class="grille-partenaires( financeurs)?">/g)];
     for (const g of grilles.reverse()) {
       const niveau = g[1] ? 'financeur' : 'confiance';
       const du = liste.filter((p) => p.niveau === niveau);
-      if (!du.length) continue;
+      if (!du.length) {
+        const s = html.lastIndexOf('<section', g.index);
+        if (s >= 0) html = html.slice(0, s) + html.slice(s).replace(/^<section([^>]*)>/, '<section$1 hidden>');
+        const debutVide = html.indexOf(g[0], s) + g[0].length;
+        const finVide = html.indexOf('</section>', debutVide);
+        html = html.slice(0, debutVide) + html.slice(debutVide, finVide).replace(/<article class="partenaire vide">[\s\S]*?<\/article>/g, '') + html.slice(finVide);
+        continue;
+      }
       const debut = g.index + g[0].length;
       // Seulement les emplacements de CETTE grille (jusqu'à la fin de sa section)
       const finSection = html.indexOf('</section>', debut);
       const fin = finSection < 0 ? html.length : finSection;
       let zone = html.slice(debut, fin);
       let i = 0;
-      zone = zone.replace(/<article class="partenaire vide">[\s\S]*?<\/article>/g, (m) => (i < du.length ? carte(du[i++]) : m));
+      zone = zone.replace(/<article class="partenaire vide">[\s\S]*?<\/article>/g, () => (i < du.length ? carte(du[i++]) : ''));
       const extra = du.slice(i).map(carte).join('');
       html = html.slice(0, debut) + extra + zone + html.slice(fin);
     }
@@ -281,6 +313,20 @@ function creer(SITE, db) {
     });
   }
 
+  // Cartes des formules (accueil) : prix par personne à 2 et à 4, calculés à partir des Tarifs du back office
+  const prixPar = (f, n) => Math.round((f.type === 'forfait' ? f.prix + (f.supp || 0) * Math.max(0, n - 4) : f.prix * n) / n);
+  function prixCartes(html, en) {
+    const parCode = Object.fromEntries(db.all('SELECT * FROM formules WHERE actif=1').map((f) => [f.code, f]));
+    const eur = (n) => (en ? `€${n}` : `${n} €`);
+    return html.replace(/<div class="prix"><b>[^<]*<\/b><span>[^<]*<\/span><span>[^<]*<\/span><\/div>(<a class="bouton" href="(?:reservation|book)\.html\?formule=([\w-]+)">)/g, (m, lien, code) => {
+      const f = parCode[code];
+      if (!f || f.type === 'a-partir') return m;
+      const base = f.type === 'forfait' ? (en ? 'flat rate, 1 to 4 people' : 'forfait 1 à 4 personnes') : (en ? 'per person' : 'par personne');
+      const detail = en ? `${eur(prixPar(f, 2))} pp for 2 · ${eur(prixPar(f, 4))} pp for 4` : `${eur(prixPar(f, 2))} / pers. à 2 · ${eur(prixPar(f, 4))} / pers. à 4`;
+      return `<div class="prix"><b>${eur(f.prix)}</b><span>${base}</span><span>${detail}</span></div>${lien}`;
+    });
+  }
+
   // Tableau « Combien pour votre groupe ? » (formules) : calculé à partir des Tarifs du back office,
   // pour qu'un changement de prix ou une nouvelle formule y apparaisse aussitôt
   const TAILLES_GROUPE = [1, 2, 4, 6, 8];
@@ -311,7 +357,8 @@ function creer(SITE, db) {
   // Dès qu'un logo existe, les emplacements « Logo à venir » disparaissent.
   function soutiens(html, en) {
     const liste = db.all("SELECT * FROM partenaires WHERE publie=1 AND niveau='soutien' ORDER BY ordre, id");
-    if (!liste.length) return html;
+    // Aucun soutien publié : le bandeau entier disparaît (pas de « Logo à venir » en ligne)
+    if (!liste.length) return html.replace(/<div class="pied-soutien">[\s\S]*?<div class="pied-soutien-logos">[\s\S]*?<\/div><\/div>/, '');
     const logos = liste.map((p) => {
       const desc = (en && p.description_en) || p.description || '';
       const titre = esc(desc ? `${p.nom} — ${desc}` : p.nom);
@@ -327,7 +374,11 @@ function creer(SITE, db) {
   // Dès qu'un logo existe, les emplacements « Logo à venir » disparaissent.
   function logosAccueil(html, en) {
     const liste = db.all("SELECT * FROM partenaires WHERE publie=1 AND niveau IN ('confiance','financeur') ORDER BY niveau='financeur', ordre, id");
-    if (!liste.length) return html;
+    // Aucun partenaire publié : la section « Ils nous font confiance » est masquée
+    if (!liste.length) {
+      return html.replace(/<section class="section serree bandeau-logos"([^>]*)>/, '<section class="section serree bandeau-logos"$1 hidden>')
+        .replace(/(<div class="grille-logos">)[\s\S]*?<\/div>/, '$1</div>');
+    }
     const logos = liste.map((p) => {
       const desc = (en && p.description_en) || p.description || '';
       const titre = esc(desc ? `${p.nom} — ${desc}` : p.nom);
@@ -352,12 +403,33 @@ function creer(SITE, db) {
   }
 
   // Case « Niveau d'alerte officiel » de l'accueil : remplace « À confirmer » par le niveau saisi
+  // Mesure d'audience sans cookie : le script de l'outil choisi dans Paramètres (Plausible ou Umami) est placé
+  // dans le <head> de toutes les pages, et la page Confidentialité le mentionne. Sans réglage : rien n'est chargé.
+  function mesureAudience(html, s, en) {
+    const outil = s.mesure_outil, id = String(s.mesure_id || '').trim();
+    if (!id || !['plausible', 'umami'].includes(outil)) return html;
+    const script = outil === 'plausible'
+      ? `<script defer data-domain="${esc(id)}" src="https://plausible.io/js/script.js"></script>`
+      : `<script defer data-website-id="${esc(id)}" src="https://cloud.umami.is/script.js"></script>`;
+    const nom = outil === 'plausible' ? 'Plausible' : 'Umami';
+    return html.replace(/<\/head>/i, `${script}\n</head>`)
+      .replace('<p>Ce site n’utilise aucun cookie publicitaire ni outil de mesure d’audience.</p>',
+        `<p>Ce site n’utilise aucun cookie publicitaire. Nous mesurons la fréquentation du site avec ${nom}, sans cookie et sans aucune donnée permettant de vous identifier : nombre de visites, pages consultées, clics sur les boutons de réservation et de WhatsApp.</p>`)
+      .replace('<p>This website uses no advertising cookies or audience measurement tools.</p>',
+        `<p>This website uses no advertising cookies. We measure visits to the site with ${nom}, without cookies and without any data that could identify you: number of visits, pages viewed, clicks on the booking and WhatsApp buttons.</p>`);
+  }
+
   const NIVEAUX = { vert: ['Vert', 'Green'], jaune: ['Jaune · vigilance', 'Yellow · vigilance'], orange: ['Orange', 'Orange'], rouge: ['Rouge', 'Red'] };
   function niveauOfficiel(html, s, en) {
     const n = NIVEAUX[s.alerte_niveau];
-    if (!n) return html;
-    const note = s.alerte_message ? esc(s.alerte_message)
-      : en ? 'Level published by the Karthala Volcano Observatory.' : 'Niveau publié par l’Observatoire volcanologique du Karthala.';
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(s.alerte_date || '') ? s.alerte_date : '';
+    const source = /^https:\/\/\S+$/.test(s.alerte_source || '') ? s.alerte_source : '';
+    // Niveau affiché seulement s'il est officiel : daté et accompagné de sa source, sinon la case disparaît
+    if (!n || !date || !source) return html.replace(/<div><span class="aujourdhui-label">(Niveau d’alerte officiel|Official alert level)<\/span><span class="alerte-pastille a-inconnu">[^<]*<\/span><small>[^<]*<\/small><\/div>/, '');
+    const jour = new Date(date + 'T12:00:00').toLocaleDateString(en ? 'en-GB' : 'fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+    const note = (s.alerte_message ? esc(s.alerte_message)
+      : en ? 'Level published by the Karthala Volcano Observatory' : 'Niveau publié par l’Observatoire volcanologique du Karthala')
+      + ` (${en ? 'on' : 'le'} ${jour}) · <a href="${esc(source)}" rel="noopener" target="_blank">${en ? 'Source' : 'Source'}</a>`;
     return html.replace(/<span class="alerte-pastille a-inconnu">[^<]*<\/span><small>[^<]*<\/small>/,
       `<span class="alerte-pastille a-${s.alerte_niveau}">${n[en ? 1 : 0]}</span><small>${note}</small>`);
   }
@@ -385,6 +457,7 @@ function creer(SITE, db) {
     if (rel === 'galerie.html' || rel === 'en/gallery.html') html = galerie(html, en);
     html = formulesDesFormulaires(html, rel, en);
     html = tableauPrix(html, rel, en);
+    if (rel === 'index.html' || rel === 'en/index.html') html = prixCartes(html, en);
     html = avisAccueil(html, en);
     html = soutiens(html, en);
     if (rel === 'index.html' || rel === 'en/index.html') html = logosAccueil(html, en);
@@ -397,6 +470,7 @@ function creer(SITE, db) {
     if (clarte) html = html.replace(/<html([^>]*?)(\sclass="([^"]*)")?([^>]*)>/i, (m, a, c, cls, b) => `<html${a} class="${cls ? cls + ' ' : ''}clarte"${b}>`);
     // Chaque mise à jour du site force les navigateurs à recharger les styles et scripts (pas d'ancienne version en cache)
     html = html.replace(/(assets\/(?:css|js)\/[\w-]+\.(?:css|js))\?v=[\w]+/g, `$1?v=${VERSION}`);
+    html = mesureAudience(html, s, en);
     html = niveauOfficiel(html, s, en);
     html = alerte(html, s, en);
     return sansHtml(html, base);
