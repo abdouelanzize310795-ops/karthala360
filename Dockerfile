@@ -4,7 +4,7 @@ ENV NODE_ENV=production
 RUN apk add --no-cache su-exec
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
-COPY server.js db.js render.js securite.js pdf.js ./
+COPY server.js db.js render.js securite.js pdf.js produits-depart.json ./
 COPY public ./public
 COPY scripts ./scripts
 RUN mkdir -p /app/data && chown -R node:node /app/data

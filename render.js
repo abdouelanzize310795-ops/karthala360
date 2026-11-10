@@ -192,33 +192,20 @@ function creer(SITE, db) {
 </li>`;
   }
 
-  // Une seule fois : les 7 produits écrits dans la page d'origine passent en base (photo, textes FR et EN,
-  // tailles, rubrique, ordre). Seuls les champs encore vides sont remplis : rien de ce qui a été saisi n'est écrasé.
+  // Une seule fois : les 7 produits de départ (produits-depart.json) reçoivent leur photo, leurs textes FR et EN,
+  // leurs choix, leur rubrique et leur ordre. Seuls les champs encore vides sont remplis : rien de ce qui a été saisi
+  // dans le back office n'est écrasé, et un produit supprimé n'est pas recréé.
   function produitsEnBase() {
     if (db.get("SELECT 1 x FROM settings WHERE key='produits_en_base'")) return;
-    const lire = (rel) => {
-      const html = source(rel), cartes = {};
-      [...html.matchAll(/<ul class="cartes-formules boutique"[^>]*>([\s\S]*?)<\/ul>/g)].forEach((ul, n) => {
-        [...ul[1].matchAll(/<li class="carte produit" id="([\w-]+)">([\s\S]*?)<\/li>/g)].forEach((li, i) => {
-          const c = li[2], txt = (re) => ((c.match(re) || [])[1] || '').replace(/&amp;/g, '&').trim();
-          cartes[li[1]] = {
-            image: '/' + txt(/<img src="([^"]+)"/).replace(/^(\.\.\/)+/, ''), badge: txt(/<span class="pastille">([^<]*)<\/span>/),
-            nom: txt(/<h3>([^<]*)<\/h3>/), description: txt(/<\/h3>\s*<p>([^<]*)<\/p>/), choix: txt(/<legend>([^<]*)<\/legend>/),
-            tailles: [...c.matchAll(/<input type="radio"[^>]*value="([^"]*)"/g)].map((m) => m[1]).join(', '),
-            unite: txt(/<div class="prix"><b>[^<]*<\/b><span>([^<]*)<\/span>/), rubrique: n === 0 ? 'textile' : 'souvenirs', ordre: n * 10 + i + 1,
-          };
-        });
-      });
-      return cartes;
-    };
-    const fr = lire('boutique.html'), en = lire('en/shop.html');
-    for (const p of db.all('SELECT * FROM produits WHERE origine=1')) {
-      const a = fr[p.code], b = en[p.code] || {};
-      if (!a) continue;
-      const valeurs = { image: a.image, badge: a.badge, badge_en: b.badge, nom_en: b.nom, description: a.description, description_en: b.description,
-        tailles: a.tailles, tailles_en: b.tailles, choix_titre: a.choix, choix_titre_en: b.choix, unite: a.unite, unite_en: b.unite, rubrique: a.rubrique };
-      for (const [k, v] of Object.entries(valeurs)) if (v && (p[k] === null || p[k] === undefined || p[k] === '')) db.run(`UPDATE produits SET ${k}=? WHERE id=?`, [v, p.id]);
-      if (!p.ordre) db.run('UPDATE produits SET ordre=? WHERE id=?', [a.ordre, p.id]);
+    let depart = [];
+    try { depart = JSON.parse(fs.readFileSync(path.join(__dirname, 'produits-depart.json'), 'utf8')); } catch { /* fichier absent : rien à reprendre */ }
+    for (const d of depart) {
+      const p = db.get('SELECT * FROM produits WHERE code=?', [d.code]);
+      if (!p) continue;
+      for (const [k, v] of Object.entries(d)) {
+        if (['code', 'nom', 'prix'].includes(k) || v === '' || v === null) continue;
+        if (k === 'ordre' ? !p.ordre : (p[k] === null || p[k] === undefined || p[k] === '')) db.run(`UPDATE produits SET ${k}=? WHERE id=?`, [v, p.id]);
+      }
     }
     db.run("UPDATE produits SET rubrique='souvenirs' WHERE rubrique IS NULL OR rubrique=''");
     db.run("INSERT INTO settings (key,value) VALUES ('produits_en_base','1')");
