@@ -453,6 +453,11 @@ ${contexte ? '\nPassages du site :\n' + contexte : ''}`;
     if (b.action === 'demander') return res.json(await demanderIA(b));
     const data = {};
     for (const [k, v] of Object.entries(b)) if (k !== 'formulaire' && k !== 'site_web') data[k] = clean(v);
+    // Formats vérifiés par le serveur aussi (le navigateur peut être contourné)
+    if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(data.email)) return res.status(400).json({ ok: false, erreur: 'Adresse e-mail invalide' });
+    if (data.telephone && String(data.telephone).replace(/\D/g, '').length < 7) return res.status(400).json({ ok: false, erreur: 'Numéro de téléphone invalide' });
+    // Trois liens ou plus dans un message : spam automatique, ignoré sans le signaler au robot
+    if ((String(data.message || '').match(/https?:\/\//gi) || []).length >= 3) return res.json({ ok: true });
 
     if (type === 'reservation') {
       if (!data.nom || !data.telephone || !data.formule) return res.status(400).json({ ok: false, erreur: 'Champs obligatoires manquants' });
@@ -1140,7 +1145,11 @@ ${contexte ? '\nPassages du site :\n' + contexte : ''}`;
   };
   app.use(express.static(SITE, cacheStatique));
   // 404 : liens relatifs de la page rendus valides quel que soit le dossier demandé (ex. /en/xyz)
-  app.use((req, res) => envoyerPage(req, res, rendu.page('404.html', baseDe(req)).replace(/<head>/i, '<head><base href="/">'), 404));
+  // Page introuvable : en anglais sous /en/, en français ailleurs
+  app.use((req, res) => {
+    const en = /^\/en(\/|$)/.test(req.path);
+    envoyerPage(req, res, rendu.page(en ? 'en/404.html' : '404.html', baseDe(req)).replace(/<head>/i, `<head><base href="${en ? '/en/' : '/'}">`), 404);
+  });
 
   // Sessions expirées : effacées au démarrage puis chaque heure
   const menageSessions = () => db.run('DELETE FROM sessions WHERE expires_at < ?', [Date.now()]);

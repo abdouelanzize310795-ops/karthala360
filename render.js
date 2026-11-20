@@ -479,6 +479,10 @@ function creer(SITE, db) {
     const en = rel.startsWith('en/');
     let html = source(rel);
     html = menu(html, rel, en);
+    // Aperçu sur les réseaux sociaux et WhatsApp : JPEG 1200 × 630 (le WebP y est mal lu), dimensions annoncées
+    html = html.replace(/(<meta (?:property="og:image"|name="twitter:image") content="[^"]*?)assets\/karthala-experience\/([\w-]+)\.webp"/g, (m, debut, nom) =>
+      (fs.existsSync(path.join(SITE, 'assets', 'partage', nom + '.jpg')) ? `${debut}assets/partage/${nom}.jpg"` : m))
+      .replace(/(<meta property="og:image" content="[^"]*\.jpg">)/, '$1\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n<meta property="og:image:type" content="image/jpeg">');
     html = adresses(html, base);
     if (rel === 'qr-codes.html') html = qr(html, base); // après les adresses : le QR contient déjà la bonne
     html = reseaux(html, s);
