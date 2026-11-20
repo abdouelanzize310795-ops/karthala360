@@ -47,6 +47,11 @@ for (const [langue, L] of Object.entries(LANGUES)) {
     const nom = sansBalises(fiche.match(/<h2>([\s\S]*?)<\/h2>/)[1]);
     const promesse = sansBalises((fiche.match(/<p class="promesse-fiche">([\s\S]*?)<\/p>/) || ['', ''])[1]);
     const image = fiche.match(/<img src="([^"]+)"/)[1].replace(/^(\.\.\/)?/, '');
+    // Description pour les moteurs de recherche : la promesse et les faits clés de la fiche (durée, marche, âge)
+    const fait = (t) => sansBalises((fiche.match(new RegExp(`<dt>${t}</dt><dd>([\\s\\S]*?)</dd>`)) || ['', ''])[1]);
+    const libelles = langue === 'fr' ? ['Durée', 'Marche', 'Âge minimum'] : ['Duration', 'Walking', 'Minimum age'];
+    const faits = libelles.map((t) => (fait(t) ? `${t}${langue === 'fr' ? ' : ' : ': '}${fait(t)}` : '')).filter(Boolean).join(' · ');
+    const description = faits ? `${promesse} ${faits}.` : promesse;
     const image800 = image.replace(/\.webp$/, '-800.webp');
     const url = `${BASE}/${L.dossier}${adresse}.html`;
     const urlFr = `${BASE}/${adresse}.html`, urlEn = `${BASE}/en/${adresse}.html`;
@@ -55,7 +60,7 @@ for (const [langue, L] of Object.entries(LANGUES)) {
     let tete = entete
       .replace(/<title>[^<]*<\/title>/, `<title>${L.titre(nom)}</title>`)
       .replace(/(<meta (?:name|property)="(?:og:|twitter:)?title" content=")[^"]*"/g, `$1${attr(L.titre(nom))}"`)
-      .replace(/(<meta (?:name|property)="(?:og:|twitter:)?description" content=")[^"]*"/g, `$1${attr(promesse)}"`)
+      .replace(/(<meta (?:name|property)="(?:og:|twitter:)?description" content=")[^"]*"/g, `$1${attr(description)}"`)
       .replace(/(<link rel="canonical" href=")[^"]*"/, `$1${url}"`)
       .replace(/(<meta property="og:url" content=")[^"]*"/, `$1${url}"`)
       .replace(/(<link rel="alternate" hreflang="fr" href=")[^"]*"/, `$1${urlFr}"`)
