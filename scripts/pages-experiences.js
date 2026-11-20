@@ -76,7 +76,25 @@ for (const [langue, L] of Object.entries(LANGUES)) {
     const article = fiche
       .replace(`id="${id}"`, `id="${adresse}"`)
       .replace(/<h2>[\s\S]*?<\/h2>/, `<h2>${L.enBref}</h2>`);
+    // Données structurées pour Google : l'excursion (reprise des Formules, adresse de cette page) et le fil d'Ariane
+    const graphe = (() => {
+      for (const m of formules.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
+        try { const j = JSON.parse(m[1]); if (j['@graph']) return j['@graph']; } catch { /* bloc suivant */ }
+      }
+      return [];
+    })();
+    const voyage = graphe.find((g) => g['@type'] === 'TouristTrip' && (String(g.url || '').endsWith(`#${id}`) || String(g.url || '').endsWith(`/${adresse}.html`)));
+    const accueil = `${BASE}/${L.dossier}index.html`;
+    const donnees = { '@context': 'https://schema.org', '@graph': [
+      ...(voyage ? [{ ...voyage, url }] : []),
+      { '@type': 'BreadcrumbList', itemListElement: [
+        { '@type': 'ListItem', position: 1, name: langue === 'fr' ? 'Accueil' : 'Home', item: accueil },
+        { '@type': 'ListItem', position: 2, name: langue === 'fr' ? 'Expériences' : 'Experiences', item: `${BASE}/${L.dossier}${L.formules}` },
+        { '@type': 'ListItem', position: 3, name: nom, item: url }] },
+    ] };
+    const jsonLd = `<script type="application/ld+json">${JSON.stringify(donnees).replace(/</g, '\\u003c')}</script>`;
     const corps = `<main id="contenu">
+${jsonLd}
 
 <section class="bandeau-page" style="background-image:url('${prefixe}${image}')">
   <div class="conteneur">
