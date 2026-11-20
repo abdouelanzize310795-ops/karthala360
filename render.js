@@ -483,6 +483,11 @@ function creer(SITE, db) {
     html = html.replace(/(<meta (?:property="og:image"|name="twitter:image") content="[^"]*?)assets\/karthala-experience\/([\w-]+)\.webp"/g, (m, debut, nom) =>
       (fs.existsSync(path.join(SITE, 'assets', 'partage', nom + '.jpg')) ? `${debut}assets/partage/${nom}.jpg"` : m))
       .replace(/(<meta property="og:image" content="[^"]*\.jpg">)/, '$1\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n<meta property="og:image:type" content="image/jpeg">');
+    // Fiche de l'agence pour Google : logo PNG, image JPEG (SVG et WebP mal lus) et fourchette de prix tirée des tarifs
+    html = html.replace(/"logo": "([^"]*?)assets\/favicon\.svg"/, '"logo": "$1assets/partage/logo-karthala360.png"')
+      .replace(/("@type": "TravelAgency"[^<]*?"image": "[^"]*?)assets\/karthala-experience\/06-caldera-panorama-blue\.webp"/, '$1assets/partage/06-caldera-panorama-blue.jpg"');
+    const prixActifs = db.all("SELECT prix FROM formules WHERE actif=1 AND type!='a-partir'").map((f) => Number(f.prix)).filter((n) => n > 0);
+    if (prixActifs.length) html = html.replace(/("@type": "TravelAgency",)/, `$1 "priceRange": "${Math.min(...prixActifs)}–${Math.max(...prixActifs)} EUR",`);
     html = adresses(html, base);
     if (rel === 'qr-codes.html') html = qr(html, base); // après les adresses : le QR contient déjà la bonne
     html = reseaux(html, s);
