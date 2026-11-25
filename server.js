@@ -893,9 +893,9 @@ ${contexte ? '\nPassages du site :\n' + contexte : ''}`;
   // ---------- Fiches participants et groupes : ajout et modification depuis le back office ----------
   // Champs autorisés (mêmes noms que les formulaires du site)
   const CHAMPS_FICHE = {
-    enregistrement: ['nom', 'sexe', 'tranche_age', 'nationalite', 'profil', 'pays', 'ville', 'telephone', 'date_sortie', 'id_sortie', 'encadrement', 'formule',
+    enregistrement: ['nom', 'age', 'sexe', 'tranche_age', 'nationalite', 'profil', 'pays', 'ville', 'telephone', 'date_sortie', 'id_sortie', 'encadrement', 'formule',
       'guide_agence', 'itineraire', 'duree_prevue', 'venu_avec', 'premiere_fois', 'urgence_nom', 'urgence_tel', 'responsable_mineur', 'niveau', 'sante',
-      'sante_detail', 'accord_photo', 'consentement', 'motivation', 'connu_par'],
+      'sante_detail', 'accord_photo', 'consentement', 'motivation', 'connu_par', 'mode_ascension'],
     groupe: ['etablissement', 'niveau_scolaire', 'ville', 'eleves', 'dont_filles', 'accompagnateurs', 'tranche_age', 'date_sortie', 'id_sortie', 'encadrement',
       'guide_agence', 'responsable_nom', 'responsable_tel', 'second_tel', 'sante', 'accord_photo', 'consentement'],
   };
@@ -916,7 +916,6 @@ ${contexte ? '\nPassages du site :\n' + contexte : ''}`;
     const type = req.body?.type;
     if (!CHAMPS_FICHE[type]) return res.status(400).json({ error: 'Seules les fiches participants et de groupe peuvent être ajoutées ici' });
     const d = ficheDepuis(type, req.body.data || {});
-    if (type === 'enregistrement' && !d.nom) return res.status(400).json({ error: 'Le nom est obligatoire' });
     if (type === 'groupe' && !d.etablissement) return res.status(400).json({ error: 'Le nom de l\'école ou du groupe est obligatoire' });
     if (!/^\d{4}-\d{2}-\d{2}$/.test(d.date_sortie || '')) return res.status(400).json({ error: 'La date de la sortie est obligatoire' });
     d.page = 'back office'; d.ajoute_par = req.user.email;
@@ -931,7 +930,6 @@ ${contexte ? '\nPassages du site :\n' + contexte : ''}`;
     if (!CHAMPS_FICHE[ligne.type]) return res.status(400).json({ error: 'Ce formulaire ne se modifie pas' });
     const avant = JSON.parse(ligne.data);
     const d = ficheDepuis(ligne.type, req.body.data, avant);
-    if (ligne.type === 'enregistrement' && !d.nom) return res.status(400).json({ error: 'Le nom est obligatoire' });
     if (!/^\d{4}-\d{2}-\d{2}$/.test(d.date_sortie || '')) return res.status(400).json({ error: 'La date de la sortie est obligatoire' });
     // Date ou formule changée sans nouveau code : la fiche suit la bonne sortie
     const codeChange = req.body.data.id_sortie !== undefined && clean(req.body.data.id_sortie) !== (avant.id_sortie || '');

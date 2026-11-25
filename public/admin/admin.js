@@ -365,11 +365,11 @@
   const AGES = ['Moins de 12 ans', '12 à 17 ans', '18 à 25 ans', '26 à 35 ans', '36 à 45 ans', '46 à 60 ans', 'Plus de 60 ans'];
   const FICHE_FORM = {
     enregistrement: [
-      ['Identité', [['nom', 'Nom et prénom *'], ['sexe', 'Sexe', ['Femme', 'Homme', 'Ne souhaite pas répondre']], ['tranche_age', 'Âge', AGES],
+      ['Identité', [['nom', 'Nom et prénom'], ['sexe', 'Sexe', ['Femme', 'Homme', 'Autre', 'Ne souhaite pas répondre']], ['age', 'Âge (années)', 'number'], ['tranche_age', 'Tranche d’âge', AGES],
         ['nationalite', 'Nationalité'], ['profil', 'Vous êtes', ['Visiteur venu de l’étranger', 'Membre de la diaspora comorienne', 'Résident des Comores']],
         ['pays', 'Pays de résidence'], ['ville', 'Ville ou île de résidence'], ['telephone', 'Téléphone (WhatsApp)', 'tel']]],
       ['Sortie', [['date_sortie', 'Date de la sortie *', 'date'], ['encadrement', 'Monte avec', ENC], ['formule', 'Formule', FORMULES_NOMS.slice(0, 4)],
-        ['id_sortie', 'Code de la sortie (vide : calculé)'], ['guide_agence', 'Guide ou agence'], ['itineraire', 'Itinéraire', ['À pied depuis Mvouni', 'En 4×4 puis à pied', 'Autre voie d’accès']],
+        ['id_sortie', 'Code de la sortie (vide : calculé)'], ['mode_ascension', 'Mode (QR code de la route)'], ['guide_agence', 'Guide, agence ou groupe'], ['itineraire', 'Itinéraire', ['À pied depuis Mvouni', 'En 4×4 puis à pied', 'Autre voie d’accès']],
         ['duree_prevue', 'Durée prévue', ['Dans la journée', 'Avec une nuit sur place']], ['venu_avec', 'Venu avec', ['Seul(e)', 'En couple', 'En famille', 'Entre amis', 'Groupe / entreprise / école / association']],
         ['premiere_fois', 'Première fois au Karthala', ON]]],
       ['Sécurité', [['urgence_nom', 'Contact d’urgence'], ['urgence_tel', 'Son téléphone', 'tel'], ['responsable_mineur', 'Adulte responsable (si mineur)'],
